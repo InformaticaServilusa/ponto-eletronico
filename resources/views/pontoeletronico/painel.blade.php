@@ -7,7 +7,7 @@ $admin = Session::get('login.ponto.painel.admin');
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>{{ getenv('APP_NAME') }} | Ponto Eletrônico | Painel</title>
+  <title>{{ getenv('APP_NAME') }} | Livro de Ponto Digital</title>
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <!-- Bootstrap 3.3.6 -->
@@ -20,50 +20,33 @@ $admin = Session::get('login.ponto.painel.admin');
   <link rel="stylesheet" href="{{ $url_base }}/adminlte/bower_components/datatables/dataTables.bootstrap.min.css">
   <!-- Theme style -->
   <link rel="stylesheet" href="{{ $url_base }}/adminlte/dist/css/AdminLTE.min.css">
-  
   <!-- AdminLTE Skins. Choose a skin from the css/skins
        folder instead of downloading all of them to reduce the load. -->
   <link rel="stylesheet" href="{{ $url_base }}/adminlte/dist/css/skins/_all-skins.min.css">
   <!-- Date Picker -->
   <link rel="stylesheet" href="{{ $url_base }}/adminlte/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
-
   <link href="{{ $url_base }}/adminlte/plugins/sweet-alert/sweet-alert.css" rel="stylesheet">
-  
   <!-- iCheck for checkboxes and radio inputs -->
   <link rel="stylesheet" href="{{ $url_base }}/adminlte/bower_components/iCheck/all.css">
-  
   <link href="{{ $url_base }}/adminlte/plugins/fileuploader/font/font-fileuploader.css" rel="stylesheet">
   <link href="{{ $url_base }}/adminlte/plugins/fileuploader/css/jquery.fileuploader.min.css" media="all" rel="stylesheet">
   <link href="{{ $url_base }}/adminlte/plugins/fileuploader/css/jquery.fileuploader-theme-thumbnails.css" media="all" rel="stylesheet">
-
     <!-- fullCalendar -->
   <link rel="stylesheet" href="{{ $url_base }}/adminlte/bower_components/fullcalendar/dist/fullcalendar.min.css">
   <link rel="stylesheet" href="{{ $url_base }}/adminlte/bower_components/fullcalendar/dist/fullcalendar.print.min.css" media="print">
-  
-  <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-  <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-  <!--[if lt IE 9]>
-  <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-  <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-  <![endif]-->
-  
   <!-- Google Font -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 </head>
 <body class="hold-transition skin-black sidebar-mini">
 <!-- Site wrapper -->
 <div class="wrapper">
-
-  
-    
   <header class="main-header">
-
     <!-- Logo -->
     <a href="#" class="logo" style="text-align: left !important;">
       <!-- mini logo for sidebar mini 50x50 pixels -->
-      <span class="logo-mini"><img src="{{ $url_base }}/img/apple-touch-icon.png"></span>
+      <span class="logo-mini"><img src="{{ $url_base }}/img/flor-fundotransparente-1-192x185.jpg"></span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg"><img src="{{ $url_base }}/img/ilab4_logo_pontoeletronico.png"></span>
+      <span class="logo-lg"><img src="{{ $url_base }}/img/Logo_NovaImagem_Servilusa_Fundo-transparente.jpg.png"></span>
     </a>
 
     <!-- Header Navbar -->
@@ -75,7 +58,7 @@ $admin = Session::get('login.ponto.painel.admin');
       <!-- Navbar Right Menu -->
       <div class="navbar-custom-menu">
         <ul class="nav navbar-nav">
-          
+
           <!-- User Account Menu -->
           <li class="dropdown user user-menu">
             <!-- Menu Toggle Button -->
@@ -104,8 +87,8 @@ $admin = Session::get('login.ponto.painel.admin');
         </ul>
       </div>
     </nav>
-  </header>  
-    
+  </header>
+
 
   <!-- =============================================== -->
 
@@ -113,7 +96,7 @@ $admin = Session::get('login.ponto.painel.admin');
   <aside class="main-sidebar">
     <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
-      
+
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel">
         <div class="pull-left image">
@@ -126,12 +109,12 @@ $admin = Session::get('login.ponto.painel.admin');
         </div>
       </div>
 
-      <!-- /.search form -->  
-        
+      <!-- /.search form -->
+
       <!-- sidebar menu: : style can be found in sidebar.less -->
       <ul class="sidebar-menu" data-widget="tree">
-        
-        @if($admin == 1)  
+
+        @if($admin == 1)
         <li>
           <a href="{{ $url_base }}/painel/acompanhamento">
             <i class="far fa-clock"></i>
@@ -163,34 +146,34 @@ $admin = Session::get('login.ponto.painel.admin');
             <span>Ajustes</span>
           </a>
         </li>
-        
+
         @endif
-        
-        
+
+
         <li>
           <a href="{{ $url_base }}/painel/sair">
             <i class="fa fa-sign-out"></i>
             <span>Sair</span>
           </a>
         </li>
-        
-        
+
+
       </ul>
     </section>
     <!-- /.sidebar -->
   </aside>
-  
-  
+
+
   <!-- =============================================== -->
 
   <!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
-      
-     
-    @yield('conteudo')  
-    
-    
-    
+
+
+    @yield('conteudo')
+
+
+
   </div>
   <!-- /.content-wrapper -->
 
@@ -198,14 +181,14 @@ $admin = Session::get('login.ponto.painel.admin');
     <strong>Copyright &copy; {{ Date("Y") }} <a href="https://ilab4.me">{{ getenv('APP_NAME') }}</a>.</strong> Todos os direitos reservados.
   </footer>
 
- 
+
   <!-- /.control-sidebar -->
   <!-- Add the sidebar's background. This div must be placed
        immediately after the control sidebar -->
   <div class="control-sidebar-bg"></div>
-  
+
   <input type="hidden" id="url_base" value="{{ $url_base }}">
-  
+
 </div>
 <!-- ./wrapper -->
 
@@ -256,14 +239,14 @@ $admin = Session::get('login.ponto.painel.admin');
             $('.cpf').mask('000.000.000-00');
             $('.time').mask('00:00');
     });
-    
+
     function setaDadosModal(id, tipo, data_ajuste, hora) {
-        
+
         var id = id;
         var tipo = tipo;
         var data_ajuste = data_ajuste;
         var hora = hora;
-        
+
         if(tipo == 'entrada'){
             $('#tipo-entrada-'+id).prop("checked", true);
             $('#tipo-saida-'+id).prop("checked", false);
@@ -278,17 +261,17 @@ $admin = Session::get('login.ponto.painel.admin');
         $("#hora-"+id).val(hora);
 
     }
-    
+
 </script>
 
 <script>
 $(document).on('click', '.btnExluir', function(e) {
-    
+
     event.preventDefault();
-    
+
     var url = $(this).data('url');
     var msg = $(this).data('msg');
-    
+
     swal({
         title: msg,
         type: "warning",
@@ -304,8 +287,8 @@ $(document).on('click', '.btnExluir', function(e) {
             window.location.href = url;
         }
       });
-    
-});    
+
+});
 </script>
 
 
@@ -346,7 +329,7 @@ $(document).on('click', '.btnExluir', function(e) {
   $(function () {
 
     $('#example1').DataTable({
-      "responsive": true,  
+      "responsive": true,
       "paging": true,
       "lengthChange": false,
       "searching": true,
@@ -370,7 +353,7 @@ $(document).on('click', '.btnExluir', function(e) {
         }
     });
   });
-  
+
 </script>
 
 <script>
@@ -382,7 +365,7 @@ $(document).on('click', '.btnExluir', function(e) {
 
       $(".datepicker").bootstrapDP({
           autoclose: true,
-          format: "dd/mm/yyyy", 
+          format: "dd/mm/yyyy",
           language: "pt-BR",
           showOtherMonths: true,
           selectOtherMonths: true,
@@ -391,10 +374,10 @@ $(document).on('click', '.btnExluir', function(e) {
           prevText: "Anterior",
           orientation: "bottom"
       });
-      
+
       $("#datepicker").bootstrapDP({
           autoclose: true,
-          format: "dd/mm/yyyy", 
+          format: "dd/mm/yyyy",
           language: "pt-BR",
           showOtherMonths: true,
           selectOtherMonths: true,
@@ -402,18 +385,18 @@ $(document).on('click', '.btnExluir', function(e) {
           nextText: "Próximo",
           prevText: "Anterior"
       });
-      
+
     });
 </script>
 
 <script>
 $(document).on('click', '.btnExluir', function(e) {
-    
+
     event.preventDefault();
-    
+
     var url = $(this).data('url');
     var msg = $(this).data('msg');
-    
+
     swal({
         title: msg,
         type: "warning",
@@ -429,8 +412,8 @@ $(document).on('click', '.btnExluir', function(e) {
             window.location.href = url;
         }
       });
-    
-});    
+
+});
 </script>
 
 
@@ -439,14 +422,14 @@ if (Session::has('status.msg')){
 
     $error_msg = Session::get("status.msg");
     Session::forget('status.msg');
-    
+
     if (isset($error_msg) AND $error_msg != ""):
         echo("<script>swal(\"$error_msg\");</script>");
     endif;
-}    
-?>   
+}
+?>
 
-<?php 
+<?php
 if(isset($error_redirect) AND $error_redirect != ""):
     header("location: $error_redirect");
 endif;
