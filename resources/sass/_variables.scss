@@ -1,0 +1,29 @@
+// Body
+$body-bg: #f8fafc;
+
+// Typography
+$font-family-sans-serif: 'Nunito', sans-serif;
+$font-size-base: 0.9rem;
+$line-height-base: 1.6;
+
+// Colors
+$blue: #3490dc;
+$indigo: #6574cd;
+$purple: #9561e2;
+$pink: #f66d9b;
+$red: #e3342f;
+$orange: #f6993f;
+$yellow: #ffed4a;
+$green: #38c172;
+$teal: #4dc0b5;
+$cyan: #6cb2eb;
+
+$verdeServilusa:#006C50;
+
+.btn-primary {
+    @include button-variant($verdeServilusa, darken($verdeServilusa, 7.5%), darken($verdeServilusa, 10%), lighten($verdeServilusa,5%), lighten($verdeServilusa, 10%), darken($verdeServilusa,30%));
+}
+
+.btn-outline-primary {
+    @include button-outline-variant($verdeServilusa, #222222, lighten($verdeServilusa,5%), $verdeServilusa);
+}
