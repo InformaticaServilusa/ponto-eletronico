@@ -8,13 +8,17 @@ use App\Usuario;
 use App\Http\Requests;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
+use App\Services\GestaoDeUtilizadores;
 use Illuminate\Support\Facades\Auth;
 
 class LoginPainelController extends PontoEletronicoController {
 
-    public function __construct()
+    protected $gestaoDeUtilizadores;
+
+    public function __construct(GestaoDeUtilizadores $gestaoDeUtilizadores)
     {
         $this->middleware('authPainelMiddleware', ['except' => ['login']]);
+        $this->gestaoDeUtilizadores = $gestaoDeUtilizadores;
     }
 
     public function login(){
@@ -38,6 +42,7 @@ class LoginPainelController extends PontoEletronicoController {
 
             //preciso de controlar aqui se é coordenador ou não é coordenador
             Session::put('login.ponto.painel.admin', false);
+            $this->gestaoDeUtilizadores->findOrCreateUser($utilizador);
 
             return redirect(getenv('APP_URL').'/painel/dashboard');
 
