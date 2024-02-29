@@ -37,8 +37,8 @@ class LoginPainelController extends PontoEletronicoController {
         if(Auth::attempt($credentials)) {
             // Authentication passed...
             $utilizador = Auth::user();
-            Session::put('login.ponto.painel.usuario_nome', $utilizador->getName());
-            Session::put('login.ponto.painel.usuario_id', $utilizador->getConvertedGuid());
+            Session::put('login.ponto.painel.utilizador_nome', $utilizador->getName());
+            Session::put('login.ponto.painel.utilizador_id', $utilizador->getConvertedGuid());
 
             //preciso de controlar aqui se é coordenador ou não é coordenador
             Session::put('login.ponto.painel.admin', false);

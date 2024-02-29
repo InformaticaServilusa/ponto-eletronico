@@ -2,7 +2,6 @@
 
 @section('conteudo')
     <?php
-
     $dia_da_semana[0] = 'Domingo';
     $dia_da_semana[1] = 'Segunda-feira';
     $dia_da_semana[2] = 'Terça-feira';

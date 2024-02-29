@@ -64,7 +64,7 @@ $admin = Session::get('login.ponto.painel.admin');
             <!-- Menu Toggle Button -->
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">
               <!-- The user image in the navbar-->
-              <span class="hidden-xs">{{ utf8_decode(Session::get('login.ponto.painel.usuario_nome')) }}</span>
+              <span class="hidden-xs">{{ utf8_decode(Session::get('login.ponto.painel.utilizador_nome')) }}</span>
             </a>
             <ul class="dropdown-menu">
               <!-- The user image in the menu -->
@@ -72,7 +72,7 @@ $admin = Session::get('login.ponto.painel.admin');
                 <img src="{{ $url_base }}/img/avatar.png" class="img-circle" alt="User Image">
 
                 <p>
-                  {{ utf8_decode(Session::get('login.ponto.painel.usuario_nome')) }}
+                  {{ utf8_decode(Session::get('login.ponto.painel.utilizador_nome')) }}
                 </p>
               </li>
               <!-- Menu Body -->
@@ -92,7 +92,7 @@ $admin = Session::get('login.ponto.painel.admin');
 
   <!-- =============================================== -->
 
-  <!-- Left side column. contains the sidebar -->
+  {{-- <!-- Left side column. contains the sidebar -->
   <aside class="main-sidebar">
     <!-- sidebar: style can be found in sidebar.less -->
     <section class="sidebar">
@@ -103,7 +103,7 @@ $admin = Session::get('login.ponto.painel.admin');
           <img src="{{ $url_base }}/img/avatar.png" class="img-circle" alt="User Image">
         </div>
         <div class="pull-left info">
-          <p>{{ utf8_decode(Session::get('login.ponto.painel.usuario_nome')) }}</p>
+          <p>{{ utf8_decode(Session::get('login.ponto.painel.utilizador_nome')) }}</p>
           <!-- Status -->
           <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
         </div>
@@ -161,7 +161,7 @@ $admin = Session::get('login.ponto.painel.admin');
       </ul>
     </section>
     <!-- /.sidebar -->
-  </aside>
+  </aside> --}}
 
 
   <!-- =============================================== -->

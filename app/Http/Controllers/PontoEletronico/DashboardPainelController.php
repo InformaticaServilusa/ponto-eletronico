@@ -20,8 +20,9 @@ class DashboardPainelController extends PontoEletronicoController {
 
     public function index()
     {
-        $utilizar_guuid = Session::get('login.ponto.painel.usuario_id');
+        $utilizar_guuid = Session::get('login.ponto.painel.utilizador_id');
         $utilizador = Utilizador::where('guuID', $utilizar_guuid)->first();
+
 
         return view('pontoeletronico/dashboard/dashboard-painel', ['utilizador' => $utilizador]);
 
