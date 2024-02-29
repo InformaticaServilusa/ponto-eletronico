@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class InsertPontoRazaoTable extends Migration
+class InsertPontoAjusteRazaoTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class InsertPontoRazaoTable extends Migration
      */
     public function up()
     {
-        $razoes = 
+        $razoes =
         [
           [
             'descricao'          => 'Consulta médica',
@@ -26,15 +26,15 @@ class InsertPontoRazaoTable extends Migration
           [
             'descricao'          => 'Falha na máquina de registro de ponto',
             'ativo'          => 1,
-          ], 
+          ],
           [
             'descricao'          => 'Outra',
             'ativo'          => 1,
-          ]  
+          ]
         ];
-        
+
         foreach ($razoes as $razao) {
-            \App\PontoRazao::create($razao);
+            \App\PontoAjusteRazao::create($razao);
         }
     }
 
