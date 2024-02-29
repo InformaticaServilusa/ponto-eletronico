@@ -23,6 +23,7 @@ Route::get('/', 'PontoEletronico\IndexController@index');
 Route::post('login', 'PontoEletronico\LoginPainelController@login');
 Route::get('painel/dashboard', 'PontoEletronico\DashboardPainelController@index');
 Route::get('painel/sair', 'PontoEletronico\LoginPainelController@sair');
+Route::post('painel/ponto/submeter', 'PontoEletronico\PontoPainelController@submeter');
 
 
 //ROUTES ANTIGAS

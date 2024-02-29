@@ -16,11 +16,12 @@ class CreatePontoTable extends Migration {
 		{
 			$table->unsignedBigInteger('id', true);
 			$table->unsignedBigInteger('utilizador_id')->nullable();
-			$table->date('data')->nullable()->unique();
+			$table->date('data')->unique();
 			$table->time('entrada_manha')->nullable();
 			$table->time('saida_manha')->nullable();
 			$table->time('entrada_tarde')->nullable();
 			$table->time('saida_tarde')->nullable();
+            $table->string('colab_obs')->nullable();
 			$table->smallInteger('status')->nullable();
 			$table->timestamps();
 

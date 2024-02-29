@@ -2,6 +2,7 @@
 
 @section('conteudo')
     <?php
+
     $dia_da_semana[0] = 'Domingo';
     $dia_da_semana[1] = 'Segunda-feira';
     $dia_da_semana[2] = 'Terça-feira';
@@ -144,11 +145,10 @@
                 <div class="modal-header text-center">
                     <h2 class="modal-title">Registo de ponto</h2>
                 </div>
-                <form method="post" action="" enctype="multipart/form-data">
+                <form method="post" action="/painel/ponto/submeter" enctype="multipart/form-data">
                     {{ csrf_field() }}
                     <div class="modal-body">
                         <!-- tipo de registo -->
-                        <input type="hidden" name="tipo" value="ponto">
                         <div class="form-group">
                             <fieldset>
                                 <legend>Data</legend>
@@ -162,11 +162,11 @@
                             <fieldset>
                                 <legend>Manhã</legend>
                                 <div class="col-md-4">
-                                    <input type="text" name="hora_entrada" class="form-control time"
+                                    <input type="text" name="entrada_manha" class="form-control time"
                                         placeholder="Hora de Entrada" value="">
                                 </div>
                                 <div class="col-md-4">
-                                    <input type="text" name="hora_saida" class="form-control time"
+                                    <input type="text" name="saida_manha" class="form-control time"
                                         placeholder="Hora de Saída" value="">
                                 </div>
                         </div>
@@ -175,11 +175,11 @@
                             <fieldset>
                                 <legend>Tarde</legend>
                                 <div class="col-md-4">
-                                    <input type="text" name="hora_entrada" class="form-control time"
+                                    <input type="text" name="entrada_tarde" class="form-control time"
                                         placeholder="Hora de Entrada" value="">
                                 </div>
                                 <div class="col-md-4">
-                                    <input type="text" name="hora_saida" class="form-control time"
+                                    <input type="text" name="saida_tarde" class="form-control time"
                                         placeholder="Hora de Saída" value="">
                                 </div>
                             </fieldset>
