@@ -31,4 +31,8 @@ class Utilizador extends Model
     public function ponto(){
     	return $this->hasMany('App\Ponto');
     }
+
+    public function coordenador(){
+        return $this->belongsTo('App\Utilizador', 'coordenador_id');
+    }
 }

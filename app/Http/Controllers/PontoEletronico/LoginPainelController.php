@@ -42,6 +42,7 @@ class LoginPainelController extends PontoEletronicoController {
 
             //preciso de controlar aqui se é coordenador ou não é coordenador
             Session::put('login.ponto.painel.admin', false);
+
             $this->gestaoDeUtilizadores->findOrCreateUser($utilizador);
 
             return redirect(getenv('APP_URL').'/painel/dashboard');
