@@ -1,17 +1,23 @@
-<?php namespace App\Http\Controllers\PontoEletronico;
+<?php
+
+namespace App\Http\Controllers\PontoEletronico;
 
 
-use Request;
 use Session;
 use App\Usuario;
-
 use App\Http\Requests;
+
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
-use App\Services\GestaoDeUtilizadores;
 use Illuminate\Support\Facades\Auth;
+use App\Services\GestaoDeUtilizadores;
+use Illuminate\Support\Facades\Request;
+use App\Http\Controllers\PontoEletronico\PontoEletronicoController;
+use LdapRecord\Models\ActiveDirectory\User;
+use LdapRecord\Models\ActiveDirectory\OrganizationalUnit;
 
-class LoginPainelController extends PontoEletronicoController {
+class LoginPainelController extends PontoEletronicoController
+{
 
     protected $gestaoDeUtilizadores;
 
@@ -21,45 +27,46 @@ class LoginPainelController extends PontoEletronicoController {
         $this->gestaoDeUtilizadores = $gestaoDeUtilizadores;
     }
 
-    public function login(){
+    public function login()
+    {
         $username = Request::input('accountname');
         $password = Request::input('password');
 
-        if(empty($username) OR empty($password)){
-            return redirect(getenv('APP_URL').'/');
+        if (empty($username) or empty($password)) {
+            return redirect(getenv('APP_URL') . '/');
         }
 
         $credentials = [
-            'mail' => $username,
+            'sAMAccountName' => $username,
             'password' => $password
         ];
 
-        if(Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials)) {
             // Authentication passed...
             $utilizador = Auth::user();
             Session::put('login.ponto.painel.utilizador_nome', $utilizador->getName());
-            Session::put('login.ponto.painel.utilizador_id', $utilizador->getConvertedGuid());
+            $db_utilizador = $this->gestaoDeUtilizadores->findOrCreateUser($utilizador);
+            Session::put('login.ponto.painel.utilizador_id', $db_utilizador->id);
+            Session::put('login.ponto.painel.utilizado_regime', $db_utilizador->regime);
+            $mes_atual = Date('m');
+            $ano_atual = date('Y');
+            if(Date('d') < 16){
+                $mes_atual = Date('m', strtotime('-1 month'));
+            }
 
-            //preciso de controlar aqui se é coordenador ou não é coordenador
-            Session::put('login.ponto.painel.admin', false);
-
-            $this->gestaoDeUtilizadores->findOrCreateUser($utilizador);
-
-            return redirect(getenv('APP_URL').'/painel/dashboard');
-
-        }else{
+            return redirect(getenv('APP_URL') . '/painel/dashboard/' . $ano_atual . '/' . $mes_atual);
+        } else {
             $erro = "Dados inválidos, tente novamente!";
             Session::put('status.msg', $erro);
-            return redirect(getenv('APP_URL').'/');
+            return redirect(getenv('APP_URL') . '/');
         }
     }
 
 
-    public function sair(){
-        Session::forget('login.ponto.painel.usuario_id');
-        Session::forget('login.ponto.painel.admin');
-        Session::forget('login.ponto.painel.usuario_nome');
+    public function sair()
+    {
+        Session::unset();
 
-        return redirect(getenv('APP_URL').'/');
+        return redirect(getenv('APP_URL') . '/');
     }
 }

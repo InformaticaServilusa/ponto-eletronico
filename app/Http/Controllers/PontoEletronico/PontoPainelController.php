@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\PontoEletronico;
 
 
+use DateTime;
 use App\Ponto;
+use App\Horario;
+
 use App\Usuario;
 use App\Utilizador;
-
 use App\PontoAjuste;
 use App\Http\Requests;
 use Illuminate\Support\Facades\DB;
@@ -17,43 +19,94 @@ use Illuminate\Support\Facades\Session;
 
 class PontoPainelController extends PontoEletronicoController
 {
-
-
     public function __construct()
     {
         $this->middleware('authPainelMiddleware');
     }
-    public function submeter()
+
+    public function submeterTrabalho()
     {
-        //How can I manage the Session?
+        $data = json_decode(Request::input('data'));
         if (Session::get('login.ponto.painel.utilizador_id') == null) {
             return redirect(getenv('APP_URL') . '/');
         }
 
-        $utilizador = Utilizador::where('guuID', Session::get('login.ponto.painel.utilizador_id'))->first();
-        $data_ponto = Request::input('data');
-        $data_arr = explode("/",$data_ponto);
-        $data_ponto = $data_arr[2].'-'.$data_arr[1].'-'.$data_arr[0];
+        if (is_array($data)) {
+            foreach ($data as $processData) {
+                $this->processDataTrabalho($processData);
+            }
+        } else {
+            $this->processDataTrabalho($data);
+        }
+
+        $msg = "Ponto submetido com sucesso!";
+        return $this->redirectDashboard($msg);
+    }
+
+    private function processDataTrabalho($data)
+    {
+        $utilizador_id = Session::get('login.ponto.painel.utilizador_id');
+
+        $utilizador = Utilizador::where('id', $utilizador_id)->first();
+        $data = Date('Y/m/d', strtotime($data));
+        $data_ponto = $data;
+        $data_arr = explode("/", $data_ponto);
+        $data_ponto = $data_arr[2] . '-' . $data_arr[1] . '-' . $data_arr[0];
+        $ponto = Ponto::where('utilizador_id', $utilizador->id)->where('data', $data_ponto)->first();
+        $horario = Horario::where('regime_id', $utilizador->regime)->first();
+        if ($ponto) {
+            //Erro
+            $msg = "Já existe um ponto submetido para este dia!";
+            $this->redirectDashboard($msg);
+        } else {
+            $ponto = new Ponto();
+            $ponto->utilizador_id = $utilizador->id;
+            $ponto->data = $data;
+            //$ponto->entrada_manha virá do modal de horario.
+            $ponto->fill($horario->toArray());
+            $ponto->status = 1;
+            $ponto->tipo_ponto_id = 1;
+            $ponto->save();
+        }
+    }
+
+    public function submeterFolga()
+    {
+        $data = json_decode(Request::input('data'));
+        $utilizador_id = $this->checkSession();
+
+        if (is_array($data)) {
+            foreach ($data as $processData) {
+                $this->processDataFolga($processData);
+            }
+        } else {
+            $this->processDataFolga($data);
+        }
+
+        $msg = "Folga submetida com sucesso!";
+        return $this->redirectDashboard($msg);
+    }
+
+    private function processDataFolga($data)
+    {
+        $utilizador_id = Session::get('login.ponto.painel.utilizador_id');
+        $utilizador = Utilizador::where('id', $utilizador_id)->first();
+        $data = Date('Y/m/d', strtotime($data));
+        $data_ponto = $data;
+        $data_arr = explode("/", $data_ponto);
+        $data_ponto = $data_arr[2] . '-' . $data_arr[1] . '-' . $data_arr[0];
         $ponto = Ponto::where('utilizador_id', $utilizador->id)->where('data', $data_ponto)->first();
         if ($ponto) {
             //Erro
             $msg = "Já existe um ponto submetido para este dia!";
-            Session::put('status.msg', $msg);
-            return redirect(getenv('APP_URL') . '/painel/dashboard');
+            $this->redirectDashboard($msg);
         } else {
             $ponto = new Ponto();
             $ponto->utilizador_id = $utilizador->id;
-            $ponto->data = $data_ponto;
-            $ponto->entrada_manha = Request::input('entrada_manha');
-            $ponto->saida_manha = Request::input('saida_manha');
-            $ponto->entrada_tarde = Request::input('entrada_tarde');
-            $ponto->saida_tarde = Request::input('saida_tarde');
-            $ponto->colab_obs = Request::input('colab_obs');
-            $ponto->status = 0;
+            $ponto->data = $data;
+            $ponto->status = 1;
+            $ponto->tipo_ponto_id = 2;
             $ponto->save();
-            $msg = "Ponto submetido com sucesso!";
-            Session::put('status.msg', $msg);
-            return redirect(getenv('APP_URL') . '/painel/dashboard');
         }
     }
 
@@ -123,5 +176,70 @@ class PontoPainelController extends PontoEletronicoController
         Session::put('status.msg', $msg);
 
         return redirect(getenv('APP_URL') . '/painel/ajuste');
+    }
+
+    public function editar()
+    {
+        //TODO: QUANDO UM REGISTO EH EDITADO, PRECISA SER FEITA UMA LOGICA PARA SABER SE ELE EH VALIDADO AUTOMATICAMENTE OU NAO!
+        $utilizador_id = $this->checkSession();
+        $ponto_id = Request::input('registo_id');
+        $ponto = Ponto::where('id', $ponto_id)->first();
+        if(!$ponto){
+            $msg = "Registo não encontrado!";
+            return $this->redirectDashboard($msg);
+        }
+        $entrada_manha = Request::input('entrada_manha');
+        $saida_manha = Request::input('saida_manha');
+        $entrada_tarde = Request::input('entrada_tarde');
+        $saida_tarde = Request::input('saida_tarde');
+        //TODO: EQUACIONAR OS TURNOS NOITE CALLCENTER
+        // $entrada_noite = Request::input('entrada_noite');
+        // $saida_noite = Request::input('saida_noite');
+        $colab_obs = Request::input('colab_obs');
+        $ponto->entrada_manha = $entrada_manha;
+        $ponto->saida_manha = $saida_manha;
+        $ponto->entrada_tarde = $entrada_tarde;
+        $ponto->saida_tarde = $saida_tarde;
+        // $ponto->entrada_noite = $entrada_noite;
+        // $ponto->saida_noite = $saida_noite;
+        $ponto->colab_obs = $colab_obs;
+        $ponto->save();
+        $msg = "Registo editado com sucesso!";
+        return $this->redirectDashboard($msg);
+    }
+
+    public function eliminar($ponto_id)
+    {
+        $utilizador_id = $this->checkSession();
+        $ponto = Ponto::where('id', $ponto_id)->first();
+        if(!$ponto){
+            $msg = "Registo não encontrado!";
+            return $this->redirectDashboard($msg);
+        }
+        $ponto->delete();
+        $msg = "Registo eliminado com sucesso!";
+        return $this->redirectDashboard($msg);
+    }
+
+    private function redirectDashboard($msg)
+    {
+        Session::put('status.msg', $msg);
+        $ano = new DateTime();
+
+        if($ano->format('d') < 16){
+            $ano->modify('-1 month');
+        }
+
+        $mes = $ano->format('m');
+        $ano = $ano->format('Y');
+        return redirect(getenv('APP_URL') . '/painel/dashboard/' . $ano . '/' . $mes);
+    }
+    private function checkSession()
+    {
+        $utilizador_id = Session::get('login.ponto.painel.utilizador_id');
+        if ($utilizador_id == null) {
+            return redirect(getenv('APP_URL') . '/');
+        }
+        return $utilizador_id;
     }
 }

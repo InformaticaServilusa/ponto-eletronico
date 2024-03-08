@@ -16,9 +16,15 @@ class Ponto extends Model
         'saida_tarde',
         'colab_obs',
         'status',
+        'tipo',
+        'tipo_ponto_id',
     ];
 
-    public function usuario(){
-        return $this->belongsTo('App\Usuario', 'usuario_id');
+    public function utilizador(){
+        return $this->belongsTo('App\Utilizador', 'utilizador_id');
+    }
+
+    public function tipo_ponto(){
+        return $this->belongsTo('App\TipoPonto', 'tipo_ponto_id');
     }
 }

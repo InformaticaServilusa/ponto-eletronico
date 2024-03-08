@@ -19,7 +19,7 @@ class CreateUsuarioTable extends Migration {
 			$table->string('guuID', 100)->unique();
 			$table->string('email', 100)->nullable();
 			$table->string('cargo', 100)->nullable();
-			$table->string('regime', 100)->nullable();
+			$table->unsignedBigInteger('regime');
 			$table->string('departamento', 100)->nullable();
 			$table->string('local', 100)->nullable();
 			$table->unsignedBigInteger('coordenador_id')->nullable();
@@ -30,6 +30,7 @@ class CreateUsuarioTable extends Migration {
 			$table->timestamps();
 
             $table->foreign('coordenador_id')->references('id')->on('utilizador');
+            $table->foreign('regime')->references('id')->on('regime');
 		});
 	}
 
@@ -43,9 +44,10 @@ class CreateUsuarioTable extends Migration {
 	{
         Schema::table('utilizador', function(Blueprint $table)
         {
-            $table->dropForeign('coordenador_id_foreign');
+            $table->dropForeign('utilizador_regime_foreign');
+            $table->dropForeign('utilizador_coordenador_id_foreign');
         });
-		Schema::drop('usuario');
+		Schema::drop('utilizador');
 	}
 
 }

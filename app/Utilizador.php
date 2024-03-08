@@ -35,4 +35,8 @@ class Utilizador extends Model
     public function coordenador(){
         return $this->belongsTo('App\Utilizador', 'coordenador_id');
     }
+
+    public function regime(){
+        return $this->hasOne('App\Regime', 'regime');
+    }
 }

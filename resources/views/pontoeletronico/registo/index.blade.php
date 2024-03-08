@@ -26,7 +26,7 @@ $mes[11] = 'Novembro';
 $mes[12] = 'Dezembro';
 
 $dia_extenso = $dia_da_semana[Date('w')];
-$mes_extenso = $mes[Date('n')];
+$mes_extenso = $mes[Date('m')];
 
 $hora = Date('H:i');
 ?>

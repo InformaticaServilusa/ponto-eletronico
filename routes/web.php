@@ -21,9 +21,13 @@ Route::get('teste', function () {
 //ROUTES QUE JA ESTOU A UTILIZAR
 Route::get('/', 'PontoEletronico\IndexController@index');
 Route::post('login', 'PontoEletronico\LoginPainelController@login');
-Route::get('painel/dashboard', 'PontoEletronico\DashboardPainelController@index');
+Route::get('painel/dashboard/{ano_atual}/{mes_atual}', 'PontoEletronico\DashboardPainelController@index');
 Route::get('painel/sair', 'PontoEletronico\LoginPainelController@sair');
-Route::post('painel/ponto/submeter', 'PontoEletronico\PontoPainelController@submeter');
+Route::post('painel/ponto/submeterTrabalho', 'PontoEletronico\PontoPainelController@submeterTrabalho');
+Route::post('painel/ponto/submeterFolga', 'PontoEletronico\PontoPainelController@submeterFolga');
+Route::post('painel/ponto/submeterJustificacao', 'PontoEletronico\PontoPainelController@submeterJustificacao');
+Route::post('painel/ponto/editar', 'PontoEletronico\PontoPainelController@editar');
+Route::get('painel/ponto/eliminar/{ponto_id}', 'PontoEletronico\PontoPainelController@eliminar');
 
 
 //ROUTES ANTIGAS
