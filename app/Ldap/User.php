@@ -16,7 +16,12 @@ class User extends Model implements Authenticable
      *
      * @var array
      */
-    public static $objectClasses = [];
+    public static $objectClasses = [
+        'top',
+        'person',
+        'organizationalPerson',
+        'user',
+    ];
     protected $guidKey = 'uuid';
 
 

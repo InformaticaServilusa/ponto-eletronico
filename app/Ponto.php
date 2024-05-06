@@ -7,8 +7,28 @@ use Illuminate\Database\Eloquent\Model;
 class Ponto extends Model
 {
     protected $table = 'ponto';
-    
-    public function usuario(){
-        return $this->belongsTo('App\Usuario', 'usuario_id');
+    protected $fillable = [
+        'utilizador_id',
+        'data',
+        'entrada_manha',
+        'saida_manha',
+        'entrada_tarde',
+        'saida_tarde',
+        'entrada_noite',
+        'saida_noite',
+        'colab_obs',
+        'coord_obs',
+        'total_horas_trabalhadas',
+        'status',
+        'tipo',
+        'tipo_ponto_id',
+    ];
+
+    public function utilizador(){
+        return $this->belongsTo('App\Utilizador', 'utilizador_id');
+    }
+
+    public function tipo_ponto(){
+        return $this->belongsTo('App\TipoPonto', 'tipo_ponto_id');
     }
 }

@@ -12,4 +12,6 @@ const mix = require('laravel-mix');
  */
 
 mix.js('resources/js/app.js', 'public/js')
-    .sass('resources/sass/app.scss', 'public/css');
+    .sass('resources/sass/app.scss', 'public/css')
+    .copy('vendor/almasaeed2010/adminlte/dist/js/adminlte.min.js', 'public/js/adminlte.min.js')
+    .copy('vendor/almasaeed2010/adminlte/dist/css/adminlte.min.css', 'public/css/adminlte.min.css');

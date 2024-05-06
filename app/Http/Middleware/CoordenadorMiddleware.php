@@ -3,10 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Request;
-use Session;
+use Illuminate\Support\Facades\Session;
 
-class AutorizacaoMiddleware
+class CoordenadorMiddleware
 {
     /**
      * Handle an incoming request.
@@ -17,16 +16,12 @@ class AutorizacaoMiddleware
      */
     public function handle($request, Closure $next)
     {
-
-        $usuario_logado = Session::get('login.ponto.utilizador_id');
-        if(!isset($usuario_logado) OR $usuario_logado == ''){
-
+        $coordenador = Session::get('login.ponto.painel.coordenador');
+        if($coordenador == 1){
+            return $next($request);
+        }else{
             $url_base = getenv('APP_URL');
-
             echo("<script>window.location.replace(\"$url_base\");</script>");
-
         }
-
-        return $next($request);
     }
 }

@@ -12,9 +12,9 @@ class CreatePontoRazaoTable extends Migration {
 	 */
 	public function up()
 	{
-		Schema::create('ponto_razao', function(Blueprint $table)
+		Schema::create('ponto_ajuste_razao', function(Blueprint $table)
 		{
-			$table->integer('id', true);
+			$table->unsignedBigInteger('id', true);
 			$table->string('descricao', 100)->nullable();
 			$table->smallInteger('ativo')->nullable();
 		});
@@ -28,7 +28,7 @@ class CreatePontoRazaoTable extends Migration {
 	 */
 	public function down()
 	{
-		Schema::drop('ponto_razao');
+		Schema::drop('ponto_ajuste_razao');
 	}
 
 }
