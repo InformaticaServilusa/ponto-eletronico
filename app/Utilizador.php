@@ -7,6 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class Utilizador extends Model
 {
     protected $table = 'utilizador';
+    protected $horas_mes = 0;
+    protected $faltas_mes = 0;
+    protected $guarded = [];
     protected $fillable = [
         'admin',
         'ativo',
@@ -38,5 +41,28 @@ class Utilizador extends Model
 
     public function regime(){
         return $this->hasOne('App\Regime', 'regime');
+    }
+
+    public function ausencia()
+    {
+        return $this->hasMany('App\Ausencia');
+    }
+
+    public function setHorasMes($horas_mes){
+        $this->horas_mes = $horas_mes;
+    }
+
+    public function getHorasMes(){
+        return $this->horas_mes;
+    }
+
+    public function setFaltasMes($numero_faltas)
+    {
+        $this->faltas_mes = $numero_faltas;
+    }
+
+    public function getFaltasMes()
+    {
+        return $this->faltas_mes;
     }
 }

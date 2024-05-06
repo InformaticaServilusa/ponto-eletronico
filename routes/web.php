@@ -21,14 +21,18 @@ Route::get('teste', function () {
 //ROUTES QUE JA ESTOU A UTILIZAR
 Route::get('/', 'PontoEletronico\IndexController@index');
 Route::post('login', 'PontoEletronico\LoginPainelController@login');
-Route::get('painel/dashboard/{ano_atual}/{mes_atual}', 'PontoEletronico\DashboardPainelController@index');
-Route::get('painel/sair', 'PontoEletronico\LoginPainelController@sair');
-Route::post('painel/ponto/submeterTrabalho', 'PontoEletronico\PontoPainelController@submeterTrabalho');
-Route::post('painel/ponto/submeterFolga', 'PontoEletronico\PontoPainelController@submeterFolga');
+Route::post('logout', 'PontoEletronico\LoginPainelController@logout');
+Route::get('painel/dashboard/{ano_mes_atual}', 'PontoEletronico\DashboardPainelController@index')->name('painel.dashboard');
+Route::get('painel/sair', 'PontoEletronico\LoginPainelController@sair')->name('painel.logout');
+Route::post('painel/ponto/submeterTrabalho', 'PontoEletronico\PontoPainelController@submeterTrabalho')->name('painel.ponto.submit');;
+Route::post('painel/ponto/submeterAusencia', 'PontoEletronico\PontoPainelController@submeterAusencia')->name('painel.ausencia.submit');
 Route::post('painel/ponto/submeterJustificacao', 'PontoEletronico\PontoPainelController@submeterJustificacao');
-Route::post('painel/ponto/editar', 'PontoEletronico\PontoPainelController@editar');
-Route::get('painel/ponto/eliminar/{ponto_id}', 'PontoEletronico\PontoPainelController@eliminar');
-
+Route::post('painel/ponto/editar', 'PontoEletronico\PontoPainelController@editar')->name('painel.ponto.edit');
+Route::post('painel/ausencia/editar', 'PontoEletronico\AusenciaPainelController@editar')->name('painel.ausencia.edit');
+Route::get('painel/ponto/eliminar/{ponto_id}', 'PontoEletronico\PontoPainelController@eliminar')->name('painel.ponto.delete');
+Route::match(['get', 'post'], 'painel/coordenacao/{ano_mes}', 'PontoEletronico\AcompanhamentoController@index');
+Route::get('painel/coordenacao/{ano_mes}/{colaborador_id}', 'PontoEletronico\AcompanhamentoController@dashboardCoordenacao')->name('painel.coordenacao.utilizador');
+Route::get('painel/coordenacao/validation/{registo_id}/{changeTo}', 'PontoEletronico\AcompanhamentoController@changeValidation')->name('painel.coordenacao.changeValidation');
 
 //ROUTES ANTIGAS
 // Route::group(['namespace' => 'PontoEletronico'], function()
@@ -58,7 +62,6 @@ Route::get('painel/ponto/eliminar/{ponto_id}', 'PontoEletronico\PontoPainelContr
 //   Route::get('/usuario/habilitar/{id}', 'UsuarioController@habilitar');
 //   Route::post('/usuario/salvar', 'UsuarioController@salvar');
 
-//   Route::get('/acompanhamento', 'AcompanhamentoController@index');
 //   Route::post('/acompanhamento', 'AcompanhamentoController@index');
 //   Route::post('/ponto/salvar', 'PontoPainelController@ajuste');
 //   Route::post('/ponto/periodo/salvar', 'PontoAjusteController@salvar');
@@ -70,4 +73,3 @@ Route::get('painel/ponto/eliminar/{ponto_id}', 'PontoEletronico\PontoPainelContr
 
 
 // });
-

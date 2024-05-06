@@ -5,82 +5,56 @@ namespace App\Http\Controllers\PontoEletronico;
 
 use Request;
 use App\Ponto;
+use App\Horario;
+use App\Ausencia;
+
 use Carbon\Carbon;
 use App\Utilizador;
-
 use App\Http\Requests;
+use App\TiposAusencia;
+use App\Services\GestaoDePontos;
 use Illuminate\Support\Facades\DB;
+use App\Services\GestaoDeAusencias;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
 
 
 class DashboardPainelController extends PontoEletronicoController
 {
+    protected $gestaoPontos;
+    protected $gestaoAusencias;
 
     public function __construct()
     {
         $this->middleware('authPainelMiddleware');
     }
 
-    public function index($ano_atual, $mes_atual)
+    public function index($ano_mes_atual)
     {
-        //TODO: CONTROLAR PASSAGENS DE ANO!
         $utilizador_id = Session::get('login.ponto.painel.utilizador_id');
         $utilizador = Utilizador::where('id', $utilizador_id)->first();
 
-        $prox_mes = sprintf('%02d', intval($mes_atual) + 1);
-        $registos_ponto = Ponto::where(
-            'utilizador_id', $utilizador->id)
-            ->where(
-                'data', '>=', $ano_atual . '-' . $mes_atual . '-16'
-            )
-            ->where(
-                'data', '<=', $ano_atual . '-' . $prox_mes . '-15'
-            )->get();
+        $prox_mes = Carbon::createFromFormat('Y-m', $ano_mes_atual)->addMonths(1);
+        $prev_mes = Carbon::createFromFormat('Y-m', $ano_mes_atual)->subMonths(1);
 
-        $registos_ponto = $registos_ponto->keyBy('data');
-        $numero_folgas_mes = $registos_ponto->where('tipo_ponto_id', 2)->count();
-        $total_horas_trabalhadas = 0;
-        foreach($registos_ponto as $ponto){
-            $am_in = Carbon::parse($ponto->entrada_manha);
-            $am_out = Carbon::parse($ponto->saida_manha);
-            $pm_in = Carbon::parse($ponto->entrada_tarde);
-            $pm_out = Carbon::parse($ponto->saida_tarde);
-            if($am_in->isValid() && $am_out->isValid() && ($am_in->diffInMinutes($am_out) > 0)){
-                $total_horas_trabalhadas += $am_in->diffInHours($am_out);
-            }
-            if($pm_in->isValid() && $pm_out->isValid() && ($pm_in->diffInMinutes($pm_out) > 0)){
-                $total_horas_trabalhadas += $pm_in->diffInHours($pm_out);
-            }
-        }
+        $registos_ponto = GestaoDePontos::getRegistosPontoMes($prev_mes, $prox_mes);
+        $registos_ausencia = GestaoDeAusencias::getRegistosAusenciaMes($prev_mes, $prox_mes);
+
+        $numero_folgas_mes = GestaoDeAusencias::countAusenciasMes($registos_ausencia);
+        $total_horas_trabalhadas = GestaoDePontos::countHorasTrabalhadas($registos_ponto);
+
+        $turnos = Horario::where('regime_id', $utilizador->regime)->get();
 
         return view('pontoeletronico/dashboard/dashboard-painel', [
             'utilizador' => $utilizador,
-            'ano_atual' => $ano_atual,
-            'mes_atual' => $mes_atual,
+            'ano_mes_atual' => $ano_mes_atual,
             'prox_mes' => $prox_mes,
+            'prev_mes' => $prev_mes,
             'registos_ponto' => $registos_ponto,
+            'registos_ausencia' => $registos_ausencia,
             'horas_mes' => $total_horas_trabalhadas,
             'folgas_mes' => $numero_folgas_mes,
-        ]);
-    }
-
-    private static function getCurrentMonth()
-    {
-        $mes[1] = 'Janeiro';
-        $mes[2] = 'Fevereiro';
-        $mes[3] = 'Março';
-        $mes[4] = 'Abril';
-        $mes[5] = 'Maio';
-        $mes[6] = 'Junho';
-        $mes[7] = 'Julho';
-        $mes[8] = 'Agosto';
-        $mes[9] = 'Setembro';
-        $mes[10] = 'Outubro';
-        $mes[11] = 'Novembro';
-        $mes[12] = 'Dezembro';
-
-        $mes_extenso = $mes[Date('n')];
-        return $mes_extenso;
+            'turnos' => $turnos,
+            ]);
     }
 }

@@ -17,19 +17,23 @@ class CreatePontoTable extends Migration {
 			$table->unsignedBigInteger('id', true);
 			$table->unsignedBigInteger('utilizador_id');
             $table->unsignedBigInteger('tipo_ponto_id');
-			$table->date('data')->unique();
-			$table->time('entrada_manha')->nullable();
-			$table->time('saida_manha')->nullable();
-			$table->time('entrada_tarde')->nullable();
-			$table->time('saida_tarde')->nullable();
-            $table->string('colab_obs')->nullable();
+			$table->date('data');
+			$table->string('entrada_manha')->nullable();
+			$table->string('saida_manha')->nullable();
+			$table->string('entrada_tarde')->nullable();
+			$table->string('saida_tarde')->nullable();
+			$table->string('entrada_noite')->nullable();
+			$table->string('saida_noite')->nullable();
+            $table->string('obs_colab')->nullable();
+            $table->string('obs_coord')->nullable();
 			$table->smallInteger('status')->nullable();
             $table->smallInteger('_ativo')->default(1);
+            $table->index(['utilizador_id','data']);
+            $table->integer('total_horas_trabalhadas')->nullable();
 			$table->timestamps();
 
             $table->foreign('utilizador_id')->references('id')->on('utilizador');
             $table->foreign('tipo_ponto_id')->references('id')->on('tipo_ponto');
-
 
 		});
 	}

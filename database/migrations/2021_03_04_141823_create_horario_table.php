@@ -16,12 +16,12 @@ class CreateHorarioTable extends Migration
         Schema::create('horario', function (Blueprint $table) {
             $table->id();
             $table->string('descricao');
-            $table->time('entrada_manha');
-            $table->time('saida_manha')->nullable();
-            $table->time('entrada_tarde')->nullable();
-            $table->time('saida_tarde')->nullable();
-            $table->time('entrada_noite')->nullable();
-            $table->time('saida_noite')->nullable();
+            $table->string('entrada_manha')->nullable();
+            $table->string('saida_manha')->nullable();
+            $table->string('entrada_tarde')->nullable();
+            $table->string('saida_tarde')->nullable();
+            $table->string('entrada_noite')->nullable();
+            $table->string('saida_noite')->nullable();
             $table->unsignedBigInteger('regime_id');
             $table->integer('horas_semanais');
             $table->integer('horas_diarias');

@@ -6,12 +6,7 @@ use App\Utilizador;
 use LdapRecord\Models\ActiveDirectory\User;
 use LdapRecord\Models\ActiveDirectory\Group;
 
-//      TODO: Preciso ainda de fazer documentaçõ desta class
-//      TODO:Precis de fazer testes unitários
-//      TODO:Preciso de fazer testes de integração
-//      TODO:Preciso de fazer testes de aceitação
-//      TODO:Preciso de fazer testes de sistema
-//      TODO:Preciso de fazer testes de regressão
+
 //      TODO:Se ja existir, verifica se precisa de ser atualizado. Ver o que eh mais susceptivel de mudar.
 class GestaoDeUtilizadores
 {
