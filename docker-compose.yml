@@ -1,0 +1,70 @@
+version: "3.7"
+services:
+  app:
+    build:
+      args:
+        user: bagco
+        uid: 1001
+      context: ./
+      dockerfile: Dockerfile
+    image: php7.3-fpm
+    container_name: php_ponto-eletronico
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - /var/www/vendor
+      - ./:/var/www
+    networks:
+      - backend
+
+  pma:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: ${DB_USERNAME}
+      PMA_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${IP}:8080:80
+    links:
+      - db:db
+    networks:
+      - backend
+    depends_on:
+      - db
+  db:
+    image: mysql:8.0
+    container_name: mysql_ponto-eletronico
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      SERVICE_TAGS: prod
+      SERVICE_NAME: mysql
+    volumes:
+      - ./docker-compose/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - backend
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_ponto-eletronico
+    restart: unless-stopped
+    ports:
+      - 8000:80
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d/
+    networks:
+      frontend:
+        aliases:
+          - pontoeletronico.teste
+      backend:
+        aliases:
+          - pontoeletronico.teste
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
