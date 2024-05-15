@@ -48,7 +48,7 @@ class LoginPainelController extends PontoEletronicoController
                 Session::put('login.ponto.painel.utilizador_nome', $utilizador->getName());
                 $db_utilizador = $this->gestaoDeUtilizadores->findOrCreateUser($utilizador);
                 Session::put('login.ponto.painel.utilizador_id', $db_utilizador->id);
-                Session::put('login.ponto.painel.utilizado_regime', $db_utilizador->regime);
+                Session::put('login.ponto.painel.utilizador_regime', $db_utilizador->regime);
                 Session::put('login.ponto.painel.coordenador', $db_utilizador->_coodenador);
                 $ano_mes_atual = Carbon::now();
                 if ($ano_mes_atual->day > 16) {

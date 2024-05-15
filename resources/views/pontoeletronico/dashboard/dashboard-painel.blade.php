@@ -9,7 +9,7 @@
     ?>
     <script>
         function submeterDiaTrabalho(dia) {
-            var regime = {{ Session::get('login.ponto.painel.utilizado_regime') }}
+            var regime = {{ Session::get('login.ponto.painel.utilizador_regime') }}
             document.querySelector('input[name="data"]').value = JSON.stringify(dia);
             if (regime == 3) {
                 event.preventDefault();
@@ -179,7 +179,7 @@
                                     16,
                                 );
                                 $startDate = Carbon\Carbon::createFromFormat('Y-m-d', $startDateString);
-                                $endDate = $startDate->copy()->addMonth();
+                                $endDate = $startDate->copy()->addMonth()->subDay();
                                 $periodo = Carbon\CarbonPeriod::create($startDate, $endDate);
                             @endphp
                             @foreach ($periodo as $dia)

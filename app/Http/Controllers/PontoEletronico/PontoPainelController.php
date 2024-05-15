@@ -45,13 +45,35 @@ class PontoPainelController extends PontoEletronicoController
 
     private function processDataTrabalho($data, $turno_id)
     {
+        //TODO: Já não existe checkboxes para inserção de multiplos, logo,refactor
         $utilizador_id = Session::get('login.ponto.painel.utilizador_id');
 
         $utilizador = Utilizador::where('id', $utilizador_id)->first();
         $data = Carbon::createFromFormat('Y-m-d', $data);
         $ponto = Ponto::where('utilizador_id', $utilizador->id)->where('data', $data->toDateString())->first();
         $ausencia = Ausencia::where('utilizador_id', $utilizador->id)->where('data', $data->toDateString())->first();
+        $today = Carbon::now();
+        //Calcular o periodo atual.
+            //Se o dia for maior ou igual a 16:
+                // Inicio Periodo = 16 - Mes Atual
+                //Fim Periodo = 15  - Mes Atual + 1
+            //Se o dia for menor que 16:
+                //Inicio Periodo = 16 - Mes atual - 1
+                //Fim periodo = 15 - Mes atual
+        //Se a data de submissão não pertencer ao intervalo do periodo atual, erro.
+        if ($today->day >= 16) {
+            $inicio_periodo = Carbon::createFromFormat('Y-m-d', $today->year . '-' . $today->month . '-16');
+            $fim_periodo = $inicio_periodo->copy()->addMonth()->subDay();
 
+        } else {
+            $inicio_periodo = Carbon::createFromFormat('Y-m-d', $today->year . '-' . ($today->month - 1) . '-16');
+            $fim_periodo =$inicio_periodo->copy()->addMonth()->subDay();
+        }
+        $periodo_atual = [
+            "inicio" => $inicio_periodo->format('Y-m-d'),
+            "fim" => $fim_periodo->format('Y-m-d')
+        ];
+        $data = $data->format('Y-m-d');
         if (isset($turno_id) && $turno_id != null) {
             $horario = Horario::where('id', $turno_id)->first();
         } else {
@@ -59,9 +81,12 @@ class PontoPainelController extends PontoEletronicoController
         }
         //TODO: Melhorar para que as mensagens de submissao/erro tenham um cabeçalho e uma lista de datas em vez de varios cabeçalhos e varias datas
         if ($ponto || $ausencia) {
-            $msg = "Já existe um ponto para o dia " . $data->format('Y-m-d') . "\\n";
+            $msg = "Já existe um ponto para o dia " . $data . "\\n";
             return $msg;
-        } else {
+        } elseif ($data > $periodo_atual['fim' ] || $data < $periodo_atual['inicio']) {
+            $msg = "Data inválida!\\n Fora do periodo atual.\\n";
+            return $msg;
+        }else {
             $ponto = new Ponto();
             $ponto->utilizador_id = $utilizador->id;
             $ponto->data = $data;
@@ -69,7 +94,7 @@ class PontoPainelController extends PontoEletronicoController
             $ponto->status = 1;
             $ponto->tipo_ponto_id = 1;
             $ponto->save();
-            $msg = "Ponto submetido com sucesso para o dia " . $data->format('Y-m-d') . "\\n";
+            $msg = "Ponto submetido com sucesso para o dia " . $data . "\\n";
             return $msg;
         }
     }

@@ -94,10 +94,36 @@ class CreatePontoAtipico extends Component
             'total_horas_trabalhadas' => $total_horas_trabalhadas,
             'status' => $total_horas_trabalhadas == 8 ? 1 : 0,
         ];
+        $today = Carbon::now();
+        //Calcular o periodo atual.
+            //Se o dia for maior ou igual a 16:
+                // Inicio Periodo = 16 - Mes Atual
+                //Fim Periodo = 15  - Mes Atual + 1
+            //Se o dia for menor que 16:
+                //Inicio Periodo = 16 - Mes atual - 1
+                //Fim periodo = 15 - Mes atual
+        //Se a data de submissão não pertencer ao intervalo do periodo atual, erro.
+        if ($today->day >= 16) {
+            $inicio_periodo = Carbon::createFromFormat('Y-m-d', $today->year . '-' . $today->month . '-16');
+            $fim_periodo = $inicio_periodo->copy()->addMonth()->subDay();
+
+        } else {
+            $inicio_periodo = Carbon::createFromFormat('Y-m-d', $today->year . '-' . ($today->month - 1) . '-16');
+            $fim_periodo =$inicio_periodo->copy()->addMonth()->subDay();
+        }
+        $periodo_atual = [
+            "inicio" => $inicio_periodo->format('Y-m-d'),
+            "fim" => $fim_periodo->format('Y-m-d')
+        ];
 
         if (count($this->data_submissao) > 1) {
+            //Se a data de submissão inicial e/ou finalnão pertencer ao periodo atual, erro.
             $startDate = Carbon::createFromFormat('Y-m-d', $this->data_submissao[0]);
             $endDate = Carbon::createFromFormat('Y-m-d', $this->data_submissao[1]);
+            if($startDate->format('Y-m-d') < $periodo_atual['inicio'] || $endDate->format('Y-m-d') > $periodo_atual['fim']) {
+                $msg .= "Data de submissão inválida.\\n Fora do periodo atual" ; // Error message
+                return $msg;
+            }
             $period = CarbonPeriod::create($startDate, $endDate);
             foreach ($period as $date) {
                 if (Ponto::where('data', $date->format('Y-m-d'))->exists() || Ausencia::where('data', $date->format('Y-m-d'))->exists()) {
@@ -115,6 +141,11 @@ class CreatePontoAtipico extends Component
         } else {
             if (Ponto::where('data', $this->data_submissao[0])->exists() || Ausencia::where('data', $this->data_submissao[0])->exists()) {
                 $msg .= "Registo já existe no dia " . Carbon::createFromFormat('Y-m-d', $this->data_submissao[0])->format('Y-m-d'); // Error message
+                return $msg;
+            }
+            if($this->data_submissao[0] < $periodo_atual['inicio'] || $this->data_submissao[0] > $periodo_atual['fim']) {
+                $msg .= "Data de submissão inválida.\\n"; // Error message
+                return $msg;
             }
 
             $data['data'] = Carbon::createFromFormat('Y-m-d', $this->data_submissao[0])->format('Y-m-d');
