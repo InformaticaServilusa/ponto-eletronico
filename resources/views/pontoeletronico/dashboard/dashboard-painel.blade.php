@@ -1,11 +1,15 @@
 @extends('pontoeletronico.painel')
-
 @section('conteudo')
     <?php
     $ano_mes_atual = \Carbon\Carbon::createFromFormat('Y-m', $ano_mes_atual);
     $mes_extenso_atual = ucfirst($ano_mes_atual->locale('pt')->monthName);
     $mes_extenso_seguinte = ucfirst($ano_mes_atual->copy()->addMonth()->locale('pt')->monthName);
     $mes_extenso_prev = ucfirst($ano_mes_atual->copy()->subMonth()->locale('pt')->monthName);
+
+    $startDateString = sprintf('%04d-%02d-%02d', $prev_mes->format('Y'), $prev_mes->format('m'), 16);
+    $startDate = Carbon\Carbon::createFromFormat('Y-m-d', $startDateString);
+    $endDate = $startDate->copy()->addMonth()->subDay();
+    $periodo = Carbon\CarbonPeriod::create($startDate, $endDate);
     ?>
     <script>
         function submeterDiaTrabalho(dia) {
@@ -143,18 +147,23 @@
                 <div class="box-header">
                     <h3 class="box-title">Livro de Ponto de <strong>16 de {{ $mes_extenso_prev }} a 15
                             {{ $mes_extenso_atual }} </strong></h3>
+                    <form action={{ route('painel.ponto.exportar') }} method="post">
+                        @csrf
+                        <input type="hidden" name="periodo_inicio" value="{{ $startDate }}">
+                        <input type="hidden" name="periodo_fim" value="{{ $endDate }}">
+                        <button type="submit" class="btn btn-primary btn-sm float-right">Exportar Livro de Ponto</button>
+                    </form>
                 </div>
                 <div class="box-body no-padding">
-                    <table class="table text-center">
+                    <table id="registosTable" class="table text-center nowrap">
                         <thead class='thead-dark'>
                             <tr>
                                 <th scope='col'></th>
                                 <th scope='col'></th>
                                 <th colspan=2 scope='col'>Manhã</th>
                                 <th colspan=2 scope='col'>Tarde</th>
-                                @if ($utilizador->regime == 3 || $utilizador->regime == 4)
-                                    <th colspan=2 scope='col'>Noite</th>
-                                @endif
+                                <th colspan=2 scope='col'>Noite</th>
+                                <th colspan=3 scope='col'></th>
                             </tr>
                             <tr>
                                 <th scope='col'>Data</th>
@@ -171,17 +180,6 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @php
-                                $startDateString = sprintf(
-                                    '%04d-%02d-%02d',
-                                    $prev_mes->format('Y'),
-                                    $prev_mes->format('m'),
-                                    16,
-                                );
-                                $startDate = Carbon\Carbon::createFromFormat('Y-m-d', $startDateString);
-                                $endDate = $startDate->copy()->addMonth()->subDay();
-                                $periodo = Carbon\CarbonPeriod::create($startDate, $endDate);
-                            @endphp
                             @foreach ($periodo as $dia)
                                 @php
                                     $tipo = '';
@@ -202,7 +200,7 @@
                                 @elseif ($dia->isWeekend())
                                     table-info @endif
                                     ">
-                                    <td scope='row'> {{ $dia }} </td>
+                                    <td scope='row'> {{ $dia->format('Y-m-d') }} </td>
                                     <td>{{ ucfirst($dia->locale('pt')->dayName) }}</td>
                                     @if ($tipo == 'ausencia')
                                         <td colspan=6>
@@ -242,59 +240,61 @@
                                     @else
                                         <td>
                                             <div style="display:flex; justify-content: center;">
-                                                <form method='post' action="{{ route('painel.ponto.submit') }}"
-                                                    name='form-entrada-trabalho'>
-                                                    {{ csrf_field() }}
-                                                    <input type='hidden' name='data'
-                                                        value='{{ json_encode($dia->format('Y-m-d')) }}'>
-                                                    <button title='Inserir dia de trabalho completo'
-                                                        class="btn btn-sm btn-success"
-                                                        onclick="submeterDiaTrabalho({{ json_encode($dia->format('Y-m-d')) }})">
-                                                        <i class="fas fa-plus"></i>
-                                                    </button>
-                                                    @if ($utilizador->regime == 3)
-                                                        <!-- Modal Escolher Turno TODO: MELHORAR UI-->
-                                                        <div class="modal fade" id="modal-selecionar-dias" tabindex="-1"
-                                                            role="dialog" aria-hidden="true">
-                                                            <div class="modal-dialog modal-md">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header">
-                                                                        <h4 class="modal-title text-center">Selector de
-                                                                            turno
-                                                                            Callcenter</h4>
-                                                                        <button type="button"
-                                                                            class="btn btn-default pull-right"
-                                                                            data-bs-dismiss="modal">&times;</button>
-                                                                    </div>
-                                                                    {{-- //TODO:ESTE MODAL SO DEVERIA APARECER UMA VEZ E NAO PARA CADA UM DOS REGISTOS --}}
-                                                                    <div class="modal-body text-centered">
-                                                                        <div class="row text-centered">
-                                                                            @if (isset($turnos) && count($turnos) > 0)
-                                                                                @foreach ($turnos as $turno)
-                                                                                    <div class="col-md-4">
-                                                                                        <p>{{ $turno->descricao }}</p>
-                                                                                        <p>Inicio:
-                                                                                            {{ $turno->entrada_manha ?? ($turno->entrada_tarde ?? ($turno->entrada_noite ?? '')) }}
-                                                                                        </p>
-                                                                                        <p>Saida:
-                                                                                            {{ $turno->saida_manha ?? ($turno->saida_tarde ?? ($turno->saida_noite ?? '')) }}
-                                                                                        </p>
-                                                                                        <input type="hidden"
-                                                                                            name="turno_id"
-                                                                                            value="{{ $turno->id }}">
-                                                                                        <button class="btn btn-primary"
-                                                                                            type="submit">Selecionar
-                                                                                            {{ $turno->id }}</button>
-                                                                                    </div>
-                                                                                @endforeach
-                                                                            @endif
+                                                @if ($is_atual == true)
+                                                    <form method='post' action="{{ route('painel.ponto.submit') }}"
+                                                        name='form-entrada-trabalho'>
+                                                        {{ csrf_field() }}
+                                                        <input type='hidden' name='data'
+                                                            value='{{ json_encode($dia->format('Y-m-d')) }}'>
+                                                        <button title='Inserir dia de trabalho completo'
+                                                            class="btn btn-sm btn-success"
+                                                            onclick="submeterDiaTrabalho({{ json_encode($dia->format('Y-m-d')) }})">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
+                                                        @if ($utilizador->regime == 3)
+                                                            <!-- Modal Escolher Turno TODO: MELHORAR UI-->
+                                                            <div class="modal fade" id="modal-selecionar-dias"
+                                                                tabindex="-1" role="dialog" aria-hidden="true">
+                                                                <div class="modal-dialog modal-md">
+                                                                    <div class="modal-content">
+                                                                        <div class="modal-header">
+                                                                            <h4 class="modal-title text-center">Selector de
+                                                                                turno
+                                                                                Callcenter</h4>
+                                                                            <button type="button"
+                                                                                class="btn btn-default pull-right"
+                                                                                data-bs-dismiss="modal">&times;</button>
+                                                                        </div>
+                                                                        {{-- //TODO:ESTE MODAL SO DEVERIA APARECER UMA VEZ E NAO PARA CADA UM DOS REGISTOS --}}
+                                                                        <div class="modal-body text-centered">
+                                                                            <div class="row text-centered">
+                                                                                @if (isset($turnos) && count($turnos) > 0)
+                                                                                    @foreach ($turnos as $turno)
+                                                                                        <div class="col-md-4">
+                                                                                            <p>{{ $turno->descricao }}</p>
+                                                                                            <p>Inicio:
+                                                                                                {{ $turno->entrada_manha ?? ($turno->entrada_tarde ?? ($turno->entrada_noite ?? '')) }}
+                                                                                            </p>
+                                                                                            <p>Saida:
+                                                                                                {{ $turno->saida_manha ?? ($turno->saida_tarde ?? ($turno->saida_noite ?? '')) }}
+                                                                                            </p>
+                                                                                            <input type="hidden"
+                                                                                                name="turno_id"
+                                                                                                value="{{ $turno->id }}">
+                                                                                            <button class="btn btn-primary"
+                                                                                                type="submit">Selecionar
+                                                                                                {{ $turno->id }}</button>
+                                                                                        </div>
+                                                                                    @endforeach
+                                                                                @endif
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    @endif
-                                                </form>
+                                                        @endif
+                                                    </form>
+                                                @endif
                                                 <a href="#tipoAusenciaModal" data-bs-toggle="modal"
                                                     wire:click="$emit('setDia', '{{ $dia->format('Y-m-d') }}')">
                                                     <button type="button" title='Inserir ausência de trabalho'
@@ -315,4 +315,5 @@
         <!-- Your other HTML content -->
         @livewire('create-ponto-atipico')
     </section>
+
 @endsection
