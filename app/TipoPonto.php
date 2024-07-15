@@ -11,4 +11,5 @@ class TipoPonto extends Model
     public function ponto(){
         return $this->hasMany('App\Ponto', 'ponto_tipo_ponto_id');
     }
+
 }

@@ -8,20 +8,18 @@ use Illuminate\Support\Facades\Http;
 
 class MesController
 {
-    public static function getHorasExpectaveisMes($ano_mes)
+    public static function get_horas_expect_mes($data_inicio, $data_fim)
     {
-        $inicio_periodo = Carbon::createFromFormat('Y-m-d', $ano_mes . '-16')->subMonth();
-        $fim_periodo = Carbon::createFromFormat('Y-m-d', $ano_mes . '-15');
-        $periodo = CarbonPeriod::create($inicio_periodo, $fim_periodo);
+        $periodo = CarbonPeriod::create($data_inicio, $data_fim);
         return self::getWeekdays($periodo) * 8;
     }
 
-    public static function getFeriadosMes($ano_mes)
+    public static function get_feriados_mes($data_inicio, $data_fim)
     {
+        //TODO:dividir os feriados em feriados ao fim de semana, e fora fim de semana
+        //para facilitar os calculos
         $response = Http::get('https://date.nager.at/api/v3/publicholidays/2024/PT');
         $arr_feriados = [];
-        $inicio_periodo = Carbon::createFromFormat('Y-m-d', $ano_mes . '-16')->subMonth();
-        $fim_periodo = Carbon::createFromFormat('Y-m-d', $ano_mes . '-15');
         if ($response->successful()) {
             $feriados = $response->json();
             foreach ($feriados as $feriado) {
@@ -29,19 +27,17 @@ class MesController
             }
         }
 
-        $feriados_mes = collect($arr_feriados)->filter(function ($nome_feriado, $data_feriado) use ($inicio_periodo, $fim_periodo) {
+        $feriados_mes = collect($arr_feriados)->filter(function ($nome_feriado, $data_feriado) use ($data_inicio, $data_fim) {
             $feriado = Carbon::parse($data_feriado);
-            return $feriado->isSameDay($inicio_periodo) || $feriado->isSameDay($fim_periodo) || $feriado->between($inicio_periodo, $fim_periodo);
+            return $feriado->isSameDay($data_inicio) || $feriado->isSameDay($data_fim) || $feriado->between($data_inicio, $data_fim);
         });
 
         return $feriados_mes;
     }
 
-    public static function getWeekendsMes($ano_mes)
+    public static function get_weekend_mes($data_inicio, $data_fim)
     {
-        $inicio_periodo = Carbon::createFromFormat('Y-m-d', $ano_mes . '-16')->subMonth();
-        $fim_periodo = Carbon::createFromFormat('Y-m-d', $ano_mes . '-15');
-        $periodo = CarbonPeriod::create($inicio_periodo, $fim_periodo);
+        $periodo = CarbonPeriod::create($data_inicio, $data_fim);
         return self::getWeekends($periodo);
     }
 

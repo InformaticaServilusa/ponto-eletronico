@@ -8,7 +8,7 @@ use App\Http\Requests\AusenciaStoreRequest;
 class AusenciaPainelController extends PontoEletronicoController
 {
     public function __construct() {
-        $this->middleware('authPainelMiddleware');
+        // $this->middleware('authPainelMiddleware');
     }
 
     public function editar(AusenciaStoreRequest $request)

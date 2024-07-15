@@ -6,6 +6,7 @@
     $inicio_periodo = Carbon::parse($inicio_periodo);
     $fim_periodo = Carbon::parse($fim_periodo);
     $periodo = CarbonPeriod::create($inicio_periodo, $fim_periodo);
+    $mes_extenso_atual = ucfirst($fim_periodo->copy()->locale('pt')->monthName);
 @endphp
 @extends('pontoeletronico.painel')
 @section('conteudo')
@@ -61,23 +62,69 @@
 
                         </span>
                         <div class="info-box-content">
-                            <span class="info-box-text">Horas trabalhadas</span>
-                            <span class="info-box-number">{{ $horas_trabalhadas }}</span>
+                            <span class="info-box-text">Total de dias trabalhados em
+                                {{ $mes_extenso_atual }}</span>
+                            <span
+                                class="info-box-number">{{ $controlo_user_mes ? $controlo_user_mes->horas_trabalhadas / 8 : 'X' }}
+                                dias</span>
                         </div>
                     </div>
-                </div>
-                <!-- /Informaçao Horas Trabalhadas-->
-                <!-- Informaçao dias de ausencias-->
-                <div class="box-body">
-                    <span class="info-box-icon bg-yellow">
-                        <i class="fa fa-plane"></i>
-                    </span>
-                    <div class="info-box-content">
-                        <span class="info-box-text">Numero de Ausencias</span>
-                        <span class="info-box-number">{{ $numero_ausencias }}</span>
+                    <!-- /Informaçao Horas Trabalhadas-->
+                    <!-- Informaçao dias de folgas-->
+                    <div class="info-box">
+                        <span class="info-box-icon bg-yellow">
+                            <i class="fa fa-plane"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total de folgas mês em
+                                {{ $mes_extenso_atual }}</span>
+                            <span
+                                class="info-box-number">{{ $controlo_user_mes ? $controlo_user_mes->horas_folga / 8 : 'X' }}
+                                dias</span>
+                        </div>
                     </div>
+                    <!-- /Informaçao dias de folgas-->
+                    <!-- Informaçao dias de folgas trabalhadas-->
+                    <div class="info-box">
+                        <span class="info-box-icon bg-yellow">
+                            <i class="fa fa-plane"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total de folgas trabalhadas mês em
+                                {{ $mes_extenso_atual }}</span>
+                            <span
+                                class="info-box-number">{{ $controlo_user_mes ? $controlo_user_mes->folgas_trabalhadas : 'X' }}
+                                dias</span>
+                        </div>
+                    </div>
+                    <!-- /Informaçao dias de folgas trabalhadas-->
+                    <!-- Informaçao dias de ausencias-->
+                    <div class="info-box">
+                        <span class="info-box-icon bg-red">
+                            <i class="fa fa-plane"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Total de faltas em
+                                {{ $mes_extenso_atual }}</span>
+                            <span
+                                class="info-box-number">{{ $controlo_user_mes ? $controlo_user_mes->horas_ausencia / 8 : 'X' }}
+                                dias</span>
+                        </div>
+                    </div>
+                    <!-- /Informaçao dias de ausencias-->
+                    <!-- Informaçao dias de ferias-->
+                    <div class="info-box">
+                        <span class="info-box-icon bg-blue">
+                            <i class="fa fa-plane"></i>
+                        </span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">Férias</span>
+                            <span class="info-box-number">{{ $controlo_user_mes ? $controlo_user_mes->ferias : 'X' }}
+                                dias</span>
+                        </div>
+                    </div>
+                    <!-- /Informaçao dias de folgas trabalhadas-->
                 </div>
-                <!-- /Informaçao dias de ausencias-->
             </div>
             <!-- /Dashboard Info -->
             <!-- Tabela Registos de Presenças/Ausenças -->
@@ -107,24 +154,31 @@
                                 <th>Saida</th>
                                 <th>Validada</th>
                                 <th>Tipo</th>
-                                <th>Acção</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach ($periodo as $dia)
                                 @php
+                                    $is_ferias = false;
                                     $registo = isset($pontos[$dia->format('Y-m-d')])
                                         ? $pontos[$dia->format('Y-m-d')]
                                         : $ausencias[$dia->format('Y-m-d')] ?? null;
+                                    $tipo = null;
+                                    if (isset($registo)) {
+                                        $tipo = $registo->get_tipo_for_view();
+                                        if ($tipo == 'ausencia') {
+                                            $is_ferias = $registo->is_ferias();
+                                        }
+                                    }
                                 @endphp
-                                <tr
-                                    class="
-                             @if (isset($pontos[$dia->format('Y-m-d')])) table-success
-                             @elseif (isset($ausencias[$dia->format('Y-m-d')]))
-                                 table-warning
-                             @elseif ($dia->isWeekend()))
-                                 table-info @endif
-                                 ">
+                                <tr class="@if ($tipo == 'ponto') table-success{{ trim('') }}
+                                @elseif ($tipo == 'ausencia' && !$is_ferias) table-danger{{ trim('') }}
+                                @elseif ($tipo == 'ausencia' && $is_ferias) table-warning{{ trim('') }}
+                                @elseif ($tipo == 'feriado') table-primary{{ trim('') }}
+                                @elseif ($dia->isWeekend()) table-primary{{ trim('') }}
+                                @else '' @endif"
+                                    @if (isset($registo) && !is_null($registo)) data-bs-toggle="modal"
+                                data-bs-target="#display-registo-modal-{{ $tipo }}-{{ $registo->id ?? '' }}" @endif>
                                     <td>{{ $dia->format('Y-m-d') }}</td>
                                     <td>{{ ucfirst($dia->locale('pt')->dayName) }}</td>
                                     <td>{{ $registo ? $registo->entrada_manha ?? '--:--' : '--:--' }}</td>
@@ -136,24 +190,28 @@
                                     @if (isset($registo))
                                         @if ($registo->status == 1)
                                             <td>
-                                                <a
-                                                    href="{{ action('PontoEletronico\AcompanhamentoController@changeValidation', [
-                                                        'registo_id' => $registo->id,
-                                                        'changeTo' => 0,
-                                                    ]) }}">✅</a>
+                                                <a href="#" data-bs-registo-id="{{ $registo->id }}"
+                                                    data-bs-change-to="0"
+                                                    data-bs-tipo-registo="{{ isset($registo->tipo_ponto_id) ? 'ponto' : 'ausencia' }}"
+                                                    data-bs-toggle="modal" data-bs-target="#change_validation_modal"
+                                                    id='change_validation' style="text-decoration: none;">✅</a>
                                             </td>
                                         @else
                                             <td>
-                                                <a
-                                                    href="{{ action('PontoEletronico\AcompanhamentoController@changeValidation', [
-                                                        'registo_id' => $registo->id,
-                                                        'changeTo' => 1,
-                                                    ]) }}">❌</a>
+                                                <a <a href="#" data-bs-registo-id="{{ $registo->id }}"
+                                                    data-bs-change-to="1"
+                                                    data-bs-tipo-registo="{{ isset($registo->tipo_ponto_id) ? 'ponto' : 'ausencia' }}"
+                                                    data-bs-toggle="modal" data-bs-target="#change_validation_modal"
+                                                    id='change_validation' style="text-decoration: none;">❌</a>
                                             </td>
                                         @endif
+                                        @include('pontoeletronico.dashboard.modal.display-registo')
+                                    @else
+                                        <td></td>
                                     @endif
                                     <td>{{ $registo ? $registo->tipo_ponto->descricao ?? $registo->tipo_ausencia->descricao : '' }}
                                     </td>
+
                                 </tr>
                             @endforeach
                         </tbody>
@@ -161,5 +219,47 @@
                 </div>
             </div>
             <!-- /Tabela Registos de Presenças/Ausenças -->
+            <div class="modal fade" id="change_validation_modal" tabindex="-1" role="dialog"
+                aria-labelledby="change_validation_modal_label" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="change_validation_modal_label">Alterar Validação</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                            </button>
+                        </div>
+                        <form id="change_validation_form" method="POST"
+                            action="{{ route('painel.coordenacao.changeValidation') }}">
+                            @csrf
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="obs_coord">Observação</label>
+                                    <textarea class="form-control" id="obs_coord" name="obs_coord" rows="3"></textarea>
+                                </div>
+                                <input type="hidden" name="modal_registo_id" id="registo_id">
+                                <input type="hidden" name="modal_changeTo" id="changeTo">
+                                <input type="hidden" name="modal_tipo_registo" id="tipo_registo">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                <button type="submit" class="btn btn-primary">Alterar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <script>
+                var myModalEl = document.getElementById('change_validation_modal')
+                myModalEl.addEventListener('shown.bs.modal', function(event) {
+                    var button = event.relatedTarget
+                    var registo_id = button.getAttribute('data-bs-registo-id')
+                    var changeTo = button.getAttribute('data-bs-change-to')
+                    var tipo_registo = button.getAttribute('data-bs-tipo-registo')
+
+                    document.getElementById('registo_id').value = registo_id
+                    document.getElementById('changeTo').value = changeTo
+                    document.getElementById('tipo_registo').value = tipo_registo
+                })
+            </script>
         </section>
     @endsection

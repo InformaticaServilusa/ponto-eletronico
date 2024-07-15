@@ -33,8 +33,12 @@ RUN docker-php-ext-install zip && \
       rm -rf /tmp/pear && \
       docker-php-ext-enable redis
 
-COPY ./opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+#Install XDEBUG
+RUN pecl install xdebug-2.9.8 && \
+    docker-php-ext-enable xdebug
 
+COPY ./docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
+COPY ./opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
@@ -48,13 +52,13 @@ RUN mkdir -p /home/$user/.composer && \
     chown -R www-data:www-data /var/www/vendor && \
     chmod -R 775 /var/www/vendor &&\
 	chown -R $user:www-data /var/www &&\
-	chmod -R 775 /var/www 
+	chmod -R 775 /var/www
 
 
 # Ensure proper permissions during runtime
 RUN chmod -R 775 /var/www  && \
 	chown -R $user:www-data /var/www
-   
+
 USER $user
 COPY composer.json composer.lock ./
 
@@ -80,7 +84,7 @@ RUN php artisan view:cache &&\
 	php artisan optimize
 RUN mv /var/www/routes/api.php.backup /var/www/routes/api.php
 USER $user
-	
+
 
 
 

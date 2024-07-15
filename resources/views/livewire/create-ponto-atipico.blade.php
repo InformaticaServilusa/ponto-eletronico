@@ -1,22 +1,23 @@
 <div class="modal fade" id="create-ponto-atipico" tabindex="-1" aria-labelledby="create-ponto-atipico" aria-hidden="true"
     wire:ignore.self>
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered moda-md">
         <div class="modal-content">
             <form wire:submit.prevent="save">
-                {{-- TODO: PASSAR O TIPO DE INPUT PARA DENTRO DO CONTROLADOR --}}
                 <div class="modal-header justify-content-between">
                     {{ csrf_field() }}
-                    <h5 class="modal-title fs-5" id="create-ponto-atipico">Selecionar data e horário</h5>
+                    <h5 class="modal-title fs-5" id="create-ponto-atipico">Introdução de
+                        {{ $tipo_entrada == 'trabalho' ? 'Ponto' : 'Ausência' }}</h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close"><span
                             aria-hidden="true">&times;</span></button>
                 </div>
                 <div class="modal-body">
-                    <div>
+                    <div class="row">
                         <fieldset>
                             <legend class="form-label ml-3">Data</legend>
                             <input type="text" class="form-control" id="data_submissao"
-                                wire:model.defer="data_submissao"
-                                onchange="this.dispatchEvent(new InputEvent('input'))">
+                                wire:model.defer="data_submissao" name="data_submissao"
+                                onchange="this.dispatchEvent(new InputEvent('input'))" required
+                                {{ $this->disabled_dataInput ? 'disabled' : '' }}>
                             <input type="hidden" class="form-control" id="tipo_entrada"
                                 wire:model.defer="tipo_entrada">
                         </fieldset>
@@ -25,11 +26,13 @@
                         @enderror
                     </div>
                     @if ($tipo_entrada == 'ausencia')
-                        <div>
+                        <div class="row mt-2">
                             <fieldset>
-                                <legend class="form-label ml-3">Tipo de entrada</legend>
-                                <select class="form-control" id="tipo_entrada" wire:model.defer="tipo_ausencia">
-                                    <option value='' disabled selected>Selecione o tipo de ausência</option>
+                                <legend class="form-label ml-3">Tipo de ausência</legend>
+                                <select class="form-control" id="tipo_entrada" wire:model.defer="tipo_ausencia"
+                                    required>
+                                    <option class="form-control" value='' disabled selected>Selecione o tipo de
+                                        ausência</option>
                                     @foreach ($tipos_ausencia as $tipo_ausencia)
                                         <option value="{{ $tipo_ausencia->id }}">{{ $tipo_ausencia->descricao }}
                                         </option>
@@ -37,29 +40,65 @@
                                 </select>
                             </fieldset>
                         </div>
-                        <div class="row mt-4">
+                        <div class="row mt-2">
                             <fieldset>
-                                <legend class="form-label ml-3">Horário</legend>
-                                <div class="col-md-6">
-                                    <label for="hora_inicio" class="form-label">Hora de Início</label>
-                                    <input type="time" class="form-control" id="hora_inicio"
-                                        wire:model.defer="hora_inicio">
-                                    @error('hora_inicio')
-                                        <span class="text-danger">{{ $message }}</span>
-                                    @enderror
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="hora_fim" class="form-label">Hora de Fim</label>
-                                    <input type="time" class="form-control" id="hora_fim"
-                                        wire:model.defer="hora_fim">
-                                    @error('hora_fim')
+                                <legend class="form-label ml-3">Justificação do colaborador</legend>
+                                <div class="col-md-12">
+                                    <textarea class="form-control" id="justificacao" rows="3" wire:model.defer="obs_colab"></textarea>
+                                    @error('justificacao')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
                                 </div>
                             </fieldset>
                         </div>
+                        <div class="row mt-2">
+                            <fieldset>
+                                <legend class="form-label ml-3">Documento justificativo</legend>
+                                <input class="form-control" type="file" wire:model.defer="anexo"
+                                    name="docJustificativo">
+                                @error('anexo')
+                                    <span class="text-danger">{{ $message }}</span>
+                                @enderror
+                            </fieldset>
+                        </div>
+                        <div class="row mt-2">
+                            <fieldset>
+                                <legend class="form-label ml-3">Horário</legend>
+                                <div class="col-md-6">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="hora_inicio" class="form-label">Hora de Início</label>
+                                            <input type="time" class="form-control" id="hora_inicio"
+                                                wire:model.defer="hora_inicio">
+                                            @error('hora_inicio')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                        <div class="col">
+                                            <label for="hora_fim" class="form-label">Hora de Fim</label>
+                                            <input type="time" class="form-control" id="hora_fim"
+                                                wire:model.defer="hora_fim">
+                                            @error('hora_fim')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
                     @else
-                        <div class="row mt-4">
+                        <div class="row mt-2">
+                            <div class="col-md-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value=""
+                                        id="was_folga" wire:model.defer='was_folga'>
+                                    <label class="form-check-label" for="was_folga">
+                                        <strong>Era dia de folga?</strong>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-2">
                             <div class="col-md-4">
                                 <fieldset>
                                     <legend class="form-label ml-3">Manhã</legend>
@@ -109,6 +148,17 @@
                                     @error('saida_noite')
                                         <span class="text-danger">{{ $message }}</span>
                                     @enderror
+                                </fieldset>
+                            </div>
+                            <div class="row mt-2">
+                                <fieldset>
+                                    <legend class="form-label ml-3">Justificação do colaborador</legend>
+                                    <div class="col-md-12">
+                                        <textarea class="form-control" id="justificacao" rows="3" wire:model.defer="obs_colab"></textarea>
+                                        @error('justificacao')
+                                            <span class="text-danger">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                 </fieldset>
                             </div>
                         </div>

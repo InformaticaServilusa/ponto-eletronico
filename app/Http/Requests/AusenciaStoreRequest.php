@@ -28,6 +28,7 @@ class AusenciaStoreRequest extends FormRequest
         return [
             'registo_id' => 'required|integer',
             'data' => 'date|date_format:Y-m-d',
+            'tipo_ausencia_id' => 'required|integer|exists:tipo_ausencia,id',
             'hora_inicio' => 'sometimes|nullable|date_format:H:i',
             'hora_fim' => [
                 'nullable',
@@ -36,7 +37,8 @@ class AusenciaStoreRequest extends FormRequest
                     return $this->input('hora_inicio') !== null;
                 }),
             ],
-            'colab_obs' => 'sometimes|nullable|string|max:255',
+            'obs_colab' => 'sometimes|nullable|string|max:255',
+            'anexo' => 'sometimes|nullable|file|mimes:pdf,doc,docx,txt,jpeg|max:2048',
         ];
     }
 }

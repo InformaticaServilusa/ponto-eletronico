@@ -1,6 +1,5 @@
-<?php $url_base = getenv('APP_URL'); ?>
 <?php
-$coordenador = Session::get('login.ponto.painel.coordenador');
+$url_base = getenv('APP_URL');
 ?>
 <!DOCTYPE html>
 <html>
@@ -20,6 +19,10 @@ $coordenador = Session::get('login.ponto.painel.coordenador');
     <link rel="stylesheet" href="{{ $url_base }}/adminlte/bower_components/Ionicons/css/ionicons.min.css">
     <!-- DataTables -->
     {{-- <link rel="stylesheet" href="{{ $url_base }}/adminlte/bower_components/datatables/dataTables.bootstrap.min.css"> --}}
+    <link
+        href="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.0.7/b-3.0.2/b-colvis-3.0.2/b-html5-3.0.2/b-print-3.0.2/datatables.min.css"
+        rel="stylesheet">
+
     <!-- Theme style -->
     <link rel="stylesheet" href="{{ $url_base }}/adminlte/dist/css/AdminLTE.min.css">
     <!-- AdminLTE Skins. Choose a skin from the css/skins
@@ -79,42 +82,59 @@ $coordenador = Session::get('login.ponto.painel.coordenador');
         <aside class="main-sidebar">
             <!-- sidebar: style can be found in sidebar.less -->
             <section class="sidebar">
-                <!-- Sidebar user panel (optional) -->
+                {{-- <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
                         <img src="{{ $url_base }}/img/avatar.png" class="img-circle" alt="User Image">
                     </div>
                     <div class="info">
-                        <p>{{ utf8_decode(Session::get('login.ponto.painel.utilizador_nome')) }}</p>
+                        <p>{{ $utilizador->nome }}</p>
                         <!-- Status -->
                         <a href="#"><i class="fa fa-circle text-success"></i>
-                            {{ Session::get('login.ponto.painel.coordenador') == 1 ? 'Coordenador' : 'Colaborador' }}</a>
+                            {{ $utilizador->getRole() }}</a>
                     </div>
-                </div>
+                </div> --}}
                 <nav class="mt-2">
                     <ul class="sidebar-menu tree" data-widget="tree">
                         <li>
-                            @php
-                                $date =
-                                    \Carbon\Carbon::now()->format('d') > 15
-                                        ? \Carbon\Carbon::now()->addMonth(1)->format('Y-m')
-                                        : \Carbon\Carbon::now()->format('Y-m');
-                            @endphp
-                            <a href="{{ $url_base }}/painel/dashboard/{{ $date }}">
+                            <a href="{{ route('painel.dashboard') }}" style="text-decoration: none;">
                                 <i class="nav-icon fa fa-dashboard"></i>
                                 <span>Registo Mensal</span>
                             </a>
                         </li>
-                        @if ($coordenador == 1)
-                            <li>
-                                <a href="{{ $url_base }}/painel/coordenacao/{{ $date }}">
-                                    <i class="far fa-clock"></i>
+                        @if ($utilizador->is_coordenador())
+                            <li class="treeview nav-link">
+                                <a href="#" style="text-decoration: none;">
+                                    <i class="fa fa-clock-o"></i>
                                     <span>Coordenação</span>
+                                    <i class="fa fa-angle-left pull-right"></i>
+                                </a>
+                                <ul class="treeview-menu">
+                                    <li>
+                                        <a href="{{ route('painel.coordenacao') }}" style="text-decoration: none;">
+                                            <i class="fa fa-circle-o"></i> Registos Gerais
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" style="text-decoration: none;">
+                                            <i class="fa fa-circle-o"></i> Registos Detalhados
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        @endif
+
+
+                        @if ($utilizador->_dep_rh == 1)
+                            <li>
+                                <a href="{{ route('painel.coordenacao.rh') }}" style="text-decoration: none;">
+                                    <i class="nav-icon fa fa-users"></i>
+                                    <span>Gestão RH</span>
                                 </a>
                             </li>
                         @endif
                         <li>
-                            <a href="{{ $url_base }}/painel/sair">
+                            <a href="{{ route('painel.logout') }}" style="text-decoration: none;">
                                 <i class="fa fa-sign-out"></i>
                                 <span>Sair</span>
                             </a>
@@ -154,11 +174,14 @@ $coordenador = Session::get('login.ponto.painel.coordenador');
         $.widget.bridge('uibutton', $.ui.button);
     </script>
     <!-- Bootstrap 3.3.6 -->
-    {{-- <script src="{{ $url_base }}/adminlte/bower_components/bootstrap/dist/js/bootstrap.min.js"></script> --}}
     <script src="{{ mix('js/app.js') }}"></script>
     <!-- DataTables -->
-    <script src="{{ $url_base }}/adminlte/bower_components/datatables/jquery.dataTables.min.js"></script>
-    <script src="{{ $url_base }}/adminlte/bower_components/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script
+        src="https://cdn.datatables.net/v/dt/jszip-3.10.1/dt-2.0.7/b-3.0.2/b-colvis-3.0.2/b-html5-3.0.2/b-print-3.0.2/datatables.min.js">
+    </script>
+
     <!-- datepicker -->
     <script src="{{ $url_base }}/adminlte/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js">
     </script>
@@ -195,13 +218,6 @@ $coordenador = Session::get('login.ponto.painel.coordenador');
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
     <script>
-        // $(document).ready(function() {
-        //     $('.datemask').mask('00/00/0000');
-        //     $('.telefone').mask('(00)00000-0000');
-        //     $('.cpf').mask('000.000.000-00');
-        //     $('.time').mask('00:00');
-        // });
-
         function setaDadosModal(id, tipo, data_ajuste, hora) {
 
             var id = id;
@@ -270,40 +286,138 @@ $coordenador = Session::get('login.ponto.painel.coordenador');
             radioClass: 'iradio_flat-green'
         });
     </script>
-    {{--
-    <script>
-        CKEDITOR.replace('editor1', {
-            height: 400
-        });
-    </script>
-    <script>
-        CKEDITOR.replace('editor2', {
-            height: 180
-        });
-    </script>
-    <script>
-        CKEDITOR.replace('editor3', {
-            height: 180
-        });
-    </script> --}}
     <script>
         $(function() {
-
-            $('#example1').DataTable({
+            var mes_atual = $("#mes_atual strong").text();
+            var username = $(".info p").text();
+            var ano_mes_atual = $("#ano_mes_atual").data("value");
+            $('#registosTable').DataTable({
                 "responsive": true,
-                "paging": true,
+                "paging": false,
+                "lengthChange": false,
+                "searching": false,
+                "ordering": false,
+                "info": false,
+                "autoWidth": false,
+                "pageLength": 31,
+                columnDefs: [{
+                    targets: [0],
+                    className: 'dt-left'
+                }, ],
+                layout: {
+                    topStart: {
+                        buttons: [{
+                                extend: 'excel',
+                                className: 'btn btn-primary',
+                                title: `Registos de ${username} referentes a ${mes_atual}`,
+                                filename: `LivroPonto_${username}_${ano_mes_atual}`,
+                                init: function(api, node, config) {
+                                    $(node).removeClass('dt-button buttons-excel buttons-html5')
+                                },
+                                exportOptions: {
+                                    columns: ':not(:last-child)'
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                className: 'btn btn-primary',
+                                title: `Registos de ${username} referentes a ${mes_atual}`,
+                                filename: `LivroPonto_${username}_${ano_mes_atual}`,
+                                init: function(api, node, config) {
+                                    $(node).removeClass('dt-button buttons-excel buttons-html5')
+                                },
+                                exportOptions: {
+                                    columns: ':not(:last-child)'
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                className: 'btn btn-primary',
+                                title: `Registos de ${username} referentes a ${mes_atual}`,
+                                filename: `LivroPonto_${username}_${ano_mes_atual}`,
+                                init: function(api, node, config) {
+                                    $(node).removeClass('dt-button buttons-excel buttons-html5')
+                                },
+                                exportOptions: {
+                                    columns: ':not(:last-child)'
+                                }
+                            }
+                        ]
+                    }
+                },
+                "oLanguage": {
+                    "sLengthMenu": "Mostrar _MENU_ registos por página",
+                    "sZeroRecords": "Nenhum registo encontrado",
+                    "sInfo": "_START_ / _END_ de _TOTAL_ registo(s)",
+                    "sInfoEmpty": "Sem registos",
+                    "sInfoFiltered": "(filtrado de _MAX_ registos)",
+                    "sSearch": "Pesquisar: ",
+                    "oPaginate": {
+                        "sFirst": "Início",
+                        "sPrevious": "Anterior",
+                        "sNext": "Próximo",
+                        "sLast": "Último"
+                    }
+                }
+            });
+
+
+            $('#coordenadorTable').DataTable({
+                "responsive": true,
+                "paging": false,
                 "lengthChange": false,
                 "searching": true,
-                "ordering": true,
-                "info": true,
-                "autoWidth": false,
-                "pageLength": 50,
+                "ordering": false,
+                "info": false,
+                "autoWidth": true,
+                "pageLength": 31,
+                layout: {
+                    topStart: {
+                        buttons: [{
+                                extend: 'excel',
+                                className: 'btn btn-primary',
+                                title: `Registos de Coordenandos referentes a ${mes_atual}`,
+                                filename: `LivroPontoCoord_${username}_${ano_mes_atual}`,
+                                init: function(api, node, config) {
+                                    $(node).removeClass('dt-button buttons-excel buttons-html5')
+                                },
+                                exportOptions: {
+                                    columns: ':not(:last-child)'
+                                }
+                            },
+                            {
+                                extend: 'pdf',
+                                className: 'btn btn-primary',
+                                title: `Registos de Coordenação ${username} referentes a ${mes_atual}`,
+                                filename: `LivroPontoCoord_${username}_${ano_mes_atual}`,
+                                init: function(api, node, config) {
+                                    $(node).removeClass('dt-button buttons-excel buttons-html5')
+                                },
+                                exportOptions: {
+                                    columns: ':not(:last-child)'
+                                }
+                            },
+                            {
+                                extend: 'print',
+                                className: 'btn btn-primary',
+                                title: `Registos de Coordenação ${username} referentes a ${mes_atual}`,
+                                filename: `LivroPontoCoord_${username}_${ano_mes_atual}`,
+                                init: function(api, node, config) {
+                                    $(node).removeClass('dt-button buttons-excel buttons-html5')
+                                },
+                                exportOptions: {
+                                    columns: ':not(:last-child)'
+                                }
+                            }
+                        ]
+                    }
+                },
                 "oLanguage": {
-                    "sLengthMenu": "Mostrar _MENU_ registros por página",
-                    "sZeroRecords": "Nenhum registro encontrado",
-                    "sInfo": "Mostrando _START_ / _END_ de _TOTAL_ registro(s)",
-                    "sInfoEmpty": "Mostrando 0 / 0 de 0 registros",
-                    "sInfoFiltered": "(filtrado de _MAX_ registros)",
+                    "sLengthMenu": "Mostrar _MENU_ registos por página",
+                    "sZeroRecords": "Nenhum registo encontrado",
+                    "sInfo": "_START_ / _END_ de _TOTAL_ registo(s)",
+                    "sInfoEmpty": "Sem registos",
+                    "sInfoFiltered": "(filtrado de _MAX_ registos)",
                     "sSearch": "Pesquisar: ",
                     "oPaginate": {
                         "sFirst": "Início",
@@ -314,8 +428,57 @@ $coordenador = Session::get('login.ponto.painel.coordenador');
                 }
             });
         });
-    </script>
 
+        $('#rhTable').DataTable({
+            "responsive": true,
+            "paging": false,
+            "lengthChange": false,
+            "searching": true,
+            "ordering": false,
+            "info": false,
+            "autoWidth": false,
+            "pageLength": 31,
+            "scrollX": true,
+            layout: {
+                topStart: {
+                    buttons: [{
+                            extend: 'excel',
+                            orientation: 'landscape',
+                            pageSize: 'LEGAL',
+                            className: 'btn btn-primary',
+                            title: `Registos de Coordenandos referentes a {{ $ano_mes }}`,
+                            filename: `LivroPontoCoord_{{ $ano_mes }}`,
+                            init: function(api, node, config) {
+                                $(node).removeClass('dt-button buttons-excel buttons-html5')
+                            },
+                        },
+                        {
+                            extend: 'pdf',
+                            orientation: 'landscape',
+                            pageSize: 'LEGAL',
+                            className: 'btn btn-primary',
+                            title: `Registos de Coordenandos referentes a {{ $ano_mes }}`,
+                            filename: `LivroPontoCoord_{{ $ano_mes }}`,
+                            init: function(api, node, config) {
+                                $(node).removeClass('dt-button buttons-excel buttons-html5')
+                            },
+                        },
+                        {
+                            extend: 'print',
+                            orientation: 'landscape',
+                            pageSize: 'LEGAL',
+                            className: 'btn btn-primary',
+                            title: `Registos de Coordenandos referentes a {{ $ano_mes }}`,
+                            filename: `LivroPontoCoord_{{ $ano_mes }}`,
+                            init: function(api, node, config) {
+                                $(node).removeClass('dt-button buttons-excel buttons-html5')
+                            },
+                        }
+                    ]
+                }
+            },
+        });
+    </script>
     <script>
         $(function() {
 

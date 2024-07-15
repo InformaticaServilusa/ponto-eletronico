@@ -65,5 +65,6 @@ class Kernel extends HttpKernel
         'authMiddleware' => \App\Http\Middleware\AutorizacaoMiddleware::class,
         'authPainelMiddleware' => \App\Http\Middleware\AutorizacaoPainelMiddleware::class,
         'CoordenadorMiddleware' => \App\Http\Middleware\CoordenadorMiddleware::class,
+        'DepRHMiddleware' => \App\Http\Middleware\DepRHMiddleware::class,
     ];
 }

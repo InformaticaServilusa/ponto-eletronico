@@ -3,12 +3,9 @@ Sistema de ponto eletrônico simplificado, desenvolvido em LARAVEL.
 
 
 ## 🔧 Funcionalidades
-
-* Inclusão, exclusão e modificação de Funcionário
-* Ponto de entrada
-* Ponto de saída
-* Justificação de falta
-* Ajustes de ponto
+* Login através de LDAP
+* Introdução de Ponto (presença) diário, ou numa range de datas
+* Introdução de Ausencias com justificaçõ
 * Aprovação de ponto
 * Relatório de ponto mensal por Funcionário com percentagem de presença, dias de faltas e justificações.
 
@@ -31,11 +28,9 @@ composer install
 php artisan key:generate
 ```
 ```
-php artisan migrate
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'root';
+php artisan migrate --seed
 ```
-* Caso nao tenha nenhuma servidor configurado para que possa aceder, aconselhasse o uso de de Laradock.
-https://dev.to/moghwan/dockerize-your-laravel-project-with-laradock-2io1
-
 
 ## 🙏 Agradecimentos
 

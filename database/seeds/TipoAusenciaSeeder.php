@@ -12,12 +12,12 @@ class TipoAusenciaSeeder extends Seeder
     public function run()
     {
         $tipo_ausencia = [
-            ['descricao' => 'Folga'],
-            ['descricao' => 'Ferias'],
-            ['descricao' => 'Falta'],
-            ['descricao' => 'Licença'],
-            ['descricao' => 'Atestado'],
-            ['descricao' => 'Outros'],
+            ['descricao' => 'Folga', 'abreviatura' => 'F'],
+            ['descricao' => 'Ferias', 'abreviatura' => 'FE'],
+            ['descricao' => 'Falta', 'abreviatura' => 'FA'],
+            ['descricao' => 'Licença', 'abreviatura' => 'L'],
+            ['descricao' => 'Atestado', 'abreviatura' => 'AT'],
+            ['descricao' => 'Outros', 'abreviatura' => 'OA'],
         ];
 
         foreach ($tipo_ausencia as $tipo_ausencia) {

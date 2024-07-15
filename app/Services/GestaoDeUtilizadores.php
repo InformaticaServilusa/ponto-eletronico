@@ -27,26 +27,24 @@ class GestaoDeUtilizadores
             }
             $utilizador_db->coordenador_id = $coordenador->id;
             if ($is_coordenador) {
-                $utilizador_db->_coodenador = 1;
+                $utilizador_db->_coordenador = 1;
             }
 
             //1 = Administrativo
             //2 = Pool
             //3 = CallCenter
             //4 = Operacionais
-            if($ldapUser->getParentDn() === "OU=CallCenter,OU=SEDE - Users,OU=Servilusa Sede,DC=sci,DC=local")
-                $utilizador_db ->regime = 3;
-            else if($ldapUser->getParentDn() === "OU=Pool,OU=SEDE - Users,OU=Servilusa Sede,DC=sci,DC=local")
-                $utilizador_db ->regime = 2;
-            else if($ldapUser->getParentDn() === "OU=Servilusa Operacionais,DC=sci,DC=local")
-                $utilizador_db ->regime = 4;
+            if ($ldapUser->getParentDn() === "OU=CallCenter,OU=SEDE - Users,OU=Servilusa Sede,DC=sci,DC=local")
+                $utilizador_db->regime = 3;
+            else if ($ldapUser->getParentDn() === "OU=Pool,OU=SEDE - Users,OU=Servilusa Sede,DC=sci,DC=local")
+                $utilizador_db->regime = 2;
+            else if ($ldapUser->getParentDn() === "OU=Servilusa Operacionais,DC=sci,DC=local")
+                $utilizador_db->regime = 4;
             else
-                $utilizador_db ->regime = 1;
+                $utilizador_db->regime = 1;
 
             if ($ldapUser->getParentDn() === "OU=RH,OU=SEDE - Users,OU=Servilusa Sede,DC=sci,DC=local")
                 $utilizador_db->_dep_rh = 1;
-
-
             $utilizador_db->save();
         }
 

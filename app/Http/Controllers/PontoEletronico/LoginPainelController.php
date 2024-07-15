@@ -24,17 +24,17 @@ class LoginPainelController extends PontoEletronicoController
 
     public function __construct(GestaoDeUtilizadores $gestaoDeUtilizadores)
     {
-        $this->middleware('authPainelMiddleware', ['except' => ['login']]);
         $this->gestaoDeUtilizadores = $gestaoDeUtilizadores;
     }
 
     public function login(Request $request)
     {
+
         $username = $request->input('accountname');
         $password = $request->input('password');
 
         if (empty($username) or empty($password)) {
-            return redirect(getenv('APP_URL') . '/');
+            return redirect()->route('login');
         }
 
         $credentials = [
@@ -49,24 +49,25 @@ class LoginPainelController extends PontoEletronicoController
                 $db_utilizador = $this->gestaoDeUtilizadores->findOrCreateUser($utilizador);
                 Session::put('login.ponto.painel.utilizador_id', $db_utilizador->id);
                 Session::put('login.ponto.painel.utilizador_regime', $db_utilizador->regime);
-                Session::put('login.ponto.painel.coordenador', $db_utilizador->_coodenador);
-                $ano_mes_atual = Carbon::now();
-                if ($ano_mes_atual->day > 16) {
-                    $ano_mes_atual = $ano_mes_atual->addMonth(1);
-                }
-                return redirect()->route('painel.dashboard', ['ano_mes_atual' => $ano_mes_atual->format('Y-m')]);
+                Session::put('login.ponto.painel.coordenador', $db_utilizador->_coordenador);
+                Session::put('utilizador', $db_utilizador);
+                Log::info("Utilizador {$username} autenticado com sucesso!");
+                Session::put('status.msg', "Bem-vindo, {$utilizador->getName()}!");
+                return redirect()->route('painel.dashboard');
             } else {
                 $erro = "Dados inválidos, tente novamente!";
                 Session::put('status.msg', $erro);
-                return redirect(getenv('APP_URL') . '/');
+                return redirect()->route('login');
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             Log::error('LDAP Authentication Error: ' . $e->getMessage());
         }
     }
     public function sair()
     {
         Session::flush();
-        return redirect(getenv('APP_URL') . '/');
+        $msg = "Sessão terminada.";
+        Session::put('status.msg', $msg);
+        return redirect()->route('login');
     }
 }

@@ -24,11 +24,19 @@ class PontoStoreRequest extends FormRequest
      *
      * @return array
      */
+    //TODO: Quando os operadores de CallCenter poderem introduzir pontos, no turno da noite a saida_noite < entrada_noite para o turno das 2300-0700
     public function rules()
     {
         return [
             'registo_id' => 'required|integer',
-            'entrada_manha' => 'sometimes|nullable|date_format:H:i',
+            'entrada_manha' => [
+                'sometimes',
+                'nullable',
+                'date_format:H:i',
+                Rule::requiredIf(function () {
+                    return $this->input('entrada_tarde') === null && $this->input('entrada_noite') === null;
+                }),
+            ],
             'saida_manha' => [
                 'sometimes',
                 'nullable',
@@ -36,16 +44,26 @@ class PontoStoreRequest extends FormRequest
                 Rule::requiredIf(function () {
                     return $this->input('entrada_manha') !== null;
                 }),
-                'gte:entrada_manha',
+                function ($att, $value, $valid) {
+                    $entrada_manha = $this->input('entrada_manha');
+                    if (!empty($entrada_manha) && $value < $entrada_manha) {
+                        $valid('A hora de saída da manhã deve ser maior que a hora de entrada da manhã.');
+                    }
+                }
             ],
             'entrada_tarde' => [
                 'sometimes',
                 'nullable',
                 'date_format:H:i',
                 Rule::requiredIf(function () {
-                    return $this->input('entrada_manha') === null ;
+                    return $this->input('entrada_manha') === null && $this->input('entrada_noite') === null;
                 }),
-                'gte:saida_manha',
+                function ($att, $value, $valid) {
+                    $saida_manha = $this->input('saida_manha');
+                    if (!empty($saida_manha) && $value < $saida_manha) {
+                        $valid('A hora de entrada da tarde deve ser maior que a hora saída da manhã.');
+                    }
+                }
             ],
             'saida_tarde' => [
                 'sometimes',
@@ -54,7 +72,12 @@ class PontoStoreRequest extends FormRequest
                 Rule::requiredIf(function () {
                     return $this->input('entrada_tarde') !== null;
                 }),
-                'gte:entrada_tarde',
+                function ($att, $value, $valid) {
+                    $entrada_tarde = $this->input('entrada_tarde');
+                    if (!empty($entrada_tarde) && $value < $entrada_tarde) {
+                        $valid('A hora de entrada da tarde deve ser maior que a hora saída da manhã.');
+                    }
+                }
             ],
             'entrada_noite' => [
                 'sometimes',
@@ -63,6 +86,12 @@ class PontoStoreRequest extends FormRequest
                 Rule::requiredIf(function () {
                     return $this->input('entrada_tarde') === null && $this->input('entrada_manha') === null;
                 }),
+                function ($att, $value, $valid) {
+                    $saida_tarde = $this->input('saida_tarde');
+                    if (!empty($saida_tarde) && $value < $saida_tarde) {
+                        $valid('A hora de entrada da tarde deve ser maior que a hora saída da manhã.');
+                    }
+                }
             ],
             'saida_noite' => [
                 'sometimes',
@@ -71,9 +100,15 @@ class PontoStoreRequest extends FormRequest
                 Rule::requiredIf(function () {
                     return $this->input('entrada_noite') !== null;
                 }),
-                'gte:entrada_noite',
+                function ($att, $value, $valid) {
+                    $entrada_noite = $this->input('entrada_noite');
+                    if (!empty($entrada_noite) && $value < $entrada_noite) {
+                        $valid('A hora de saída de noite deve ser maior que a hora de entrada da noite.');
+                    }
+                }
             ],
             'obs_colab' => 'sometimes|nullable|string|max:255',
+            'was_folga' => 'sometimes|nullable',
         ];
     }
 }

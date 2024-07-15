@@ -7,8 +7,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Auth;
 use App\Utilizador;
 
-
-class CoordenadorMiddleware
+class DepRHMiddleware
 {
     /**
      * Handle an incoming request.
@@ -19,17 +18,17 @@ class CoordenadorMiddleware
      */
     public function handle($request, Closure $next)
     {
-        try {
+        try{
             $ldapUser = Auth::user();
             $utilizador_db = Utilizador::where('guuID', $ldapUser->getConvertedGuid())->first();
-            if (isset($utilizador_db) && $utilizador_db->_coordenador == 1) {
+            if(isset($utilizador_db) && $utilizador_db->_dep_rh == 1){
                 return $next($request);
-            } else {
+            }else{
                 $msg =  'Não tem permissões para aceder a esta página. Contacte o suporte Informático.';
                 Session::put('status.msg', $msg);
                 return redirect()->back()->with($msg);
             }
-        } catch (\Exception $e) {
+        } catch(\Exception $e){
             $msg =  'Não tem permissões para aceder a esta página. Contacte o suporte Informático.';
             Session::put('status.msg', $msg);
             return redirect()->back()->with($msg);

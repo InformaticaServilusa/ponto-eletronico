@@ -45,6 +45,6 @@ class CreateTableAusencia extends Migration
             $table->dropForeign('ausencia_tipo_ausencia_id_foreign');
             $table->dropForeign('ausencia_utilizador_id_foreign');
         });
-        Schema::dropIfExists('table_ausencia');
+        Schema::drop('ausencia');
     }
 }
