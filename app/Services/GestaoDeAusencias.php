@@ -76,8 +76,12 @@ class GestaoDeAusencias
             unset($data['obs_colab']);
             $ausencia->obs_colab = "Correcção";
         }
+
         if ($data['hora_inicio'] == null && $data['hora_fim'] == null) {
-            $ausencia->horas_ausencia = 8;
+            $total_ausencia = 8;
+            $ausencia->horas_ausencia = $total_ausencia;
+            $ausencia->hora_inicio = null;
+            $ausencia->hora_fim = null;
             $ausencia->status = 1;
         } else {
             $total_ausencia = Carbon::parse($data['hora_inicio'])->diffInHours(Carbon::parse($data['hora_fim']));
@@ -88,9 +92,56 @@ class GestaoDeAusencias
                 $total_ausencia -= 1;
             }
             $ausencia->horas_ausencia = $total_ausencia;
-            $controlo_user_mes->horas_ausencia = max(0, $controlo_user_mes->horas_ausencia - ($total_anterior - $total_ausencia));
-            $controlo_user_mes->horas_trabalhadas = max(0, $controlo_user_mes->horas_trabalhadas - ($total_ausencia - $total_anterior));
         }
+
+        //tratar totalizadores
+        switch ($data['tipo_ausencia_id']) {
+                //Está a mudar para Folga
+            case 1:
+                //É ferias e muda para folga
+                if ($ausencia->is_ferias()) {
+                    $controlo_user_mes->ferias -= 1;
+                    //É falta e muda para folga
+                } elseif ($ausencia->is_falta()) {
+                    $controlo_user_mes->horas_ausencia -= $total_anterior;
+                } elseif ($ausencia->is_folga()) {
+                    $controlo_user_mes->horas_folga -= $total_anterior;
+                }
+                $controlo_user_mes->horas_folga += $total_ausencia;
+                if ($total_anterior < 8) {
+                    $controlo_user_mes->horas_trabalhadas -= (8 - $total_anterior);
+                }
+                if ($total_ausencia < 8) {
+                    $controlo_user_mes->horas_trabalhadas += (8 - $total_ausencia);
+                }
+                break;
+            case 2:
+                if ($ausencia->is_folga()) {
+                    $controlo_user_mes->horas_folga -= $total_anterior;
+                    if($total_anterior < 8){
+                        $controlo_user_mes->horas_trabalhadas -= (8 - $total_anterior);
+                    }
+                } elseif ($ausencia->is_falta()) {
+                    $controlo_user_mes->horas_ausencia -= $total_anterior;
+                }
+                $controlo_user_mes->ferias += 1;
+                break;
+            default:
+                if ($ausencia->is_ferias()) {
+                    $controlo_user_mes->ferias -= 1;
+                } elseif ($ausencia->is_folga()) {
+                    $controlo_user_mes->horas_folga -= $total_anterior;
+                }
+                $controlo_user_mes->horas_ausencia += $total_ausencia;
+                if ($total_anterior < 8) {
+                    $controlo_user_mes->horas_trabalhadas -= (8 - $total_anterior);
+                }
+                if ($total_ausencia < 8) {
+                    $controlo_user_mes->horas_trabalhadas += (8 - $total_ausencia);
+                }
+                break;
+        }
+
 
         try {
             if (!empty($data['anexo'])) {

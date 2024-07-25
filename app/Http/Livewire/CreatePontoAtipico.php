@@ -194,6 +194,8 @@ class CreatePontoAtipico extends Component
                     }
                     if ($this->was_folga) {
                         $ponto_control_rh->folgas_trabalhadas += 1;
+                        $ponto->status = 0;
+                        $ponto->save();
                     }
                     $ponto_control_rh->save();
                 } else {
@@ -232,6 +234,8 @@ class CreatePontoAtipico extends Component
 
                 if ($this->was_folga) {
                     $ponto_control_rh->folgas_trabalhadas += 1;
+                    $ponto->status = 0;
+                    $ponto->save();
                 }
 
                 $ponto_control_rh->save();
@@ -307,6 +311,8 @@ class CreatePontoAtipico extends Component
                         $ponto_control_rh->horas_ausencia += $hora_ausencia;
                     } elseif ($ausencia->is_ferias()) {
                         $ponto_control_rh->ferias += 1;
+                        $ausencia->status = 0;
+                        $ausencia->save();
                     } else {
                         $ponto_control_rh->horas_folga += $hora_ausencia;
                     }
@@ -336,6 +342,8 @@ class CreatePontoAtipico extends Component
                         $ponto_control_rh->horas_ausencia += $hora_ausencia;
                     } elseif ($ausencia->is_ferias()) {
                         $ponto_control_rh->ferias += 1;
+                        $ausencia->status = 0;
+                        $ausencia->save();
                     } else {
                         $ponto_control_rh->horas_folga += $hora_ausencia;
                     }
