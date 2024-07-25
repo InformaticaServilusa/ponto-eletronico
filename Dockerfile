@@ -33,11 +33,8 @@ RUN docker-php-ext-install zip && \
       rm -rf /tmp/pear && \
       docker-php-ext-enable redis
 
-#Install XDEBUG
-RUN pecl install xdebug-2.9.8 && \
-    docker-php-ext-enable xdebug
 
-COPY ./docker-php-ext-xdebug.ini /usr/local/etc/php/conf.d/
+
 COPY ./opcache.ini /usr/local/etc/php/conf.d/opcache.ini
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -59,7 +56,7 @@ RUN mkdir -p /home/$user/.composer && \
 RUN chmod -R 775 /var/www  && \
 	chown -R $user:www-data /var/www
 
-USER $user
+USER root
 COPY composer.json composer.lock ./
 
 RUN composer self-update &&\
@@ -67,7 +64,6 @@ RUN composer self-update &&\
 COPY . .
 
 # Dump autoload files
-USER root
 RUN composer dump-autoload --optimize && \
     chown -R $user:www-data /var/www/vendor && \
     chmod -R 775 /var/www/vendor
